@@ -12,8 +12,9 @@ export function useProfile() {
         .from('profiles')
         .select('*')
         .eq('id', user!.id)
-        .single()
+        .maybeSingle()
       if (error) throw error
+      if (!data) throw new Error('Profile not found')
       return data
     },
     enabled: !!user,
