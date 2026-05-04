@@ -133,15 +133,16 @@ async function insertAuditLog(params: {
 
 export function useCreateAsset() {
 	const qc = useQueryClient();
-	const { user } = useAuth();
+	const { user, profile } = useAuth();
 
 	return useMutation({
 		mutationFn: async (
 			values: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'allotted_user'>,
 		) => {
+			const actorId = profile?.id ?? user!.id;
 			const { data, error } = await supabase
 				.from('assets')
-				.insert({ ...values, created_by: user!.id })
+				.insert({ ...values, created_by: actorId })
 				.select()
 				.single();
 			if (error) throw error;
@@ -149,14 +150,14 @@ export function useCreateAsset() {
 			await insertAuditLog({
 				asset_id: data.id,
 				action: 'created',
-				actor_id: user!.id,
+				actor_id: actorId,
 				after_state: data,
 			});
 			if (values.allotted_user_id) {
 				await insertAuditLog({
 					asset_id: data.id,
 					action: 'assigned',
-					actor_id: user!.id,
+					actor_id: actorId,
 					after_state: { allotted_user_id: values.allotted_user_id },
 				});
 			}
@@ -169,7 +170,7 @@ export function useCreateAsset() {
 
 export function useUpdateAsset() {
 	const qc = useQueryClient();
-	const { user } = useAuth();
+	const { user, profile } = useAuth();
 
 	return useMutation({
 		mutationFn: async ({
@@ -192,7 +193,7 @@ export function useUpdateAsset() {
 			await insertAuditLog({
 				asset_id: id,
 				action: 'updated',
-				actor_id: user!.id,
+				actor_id: profile?.id ?? user!.id,
 				before_state: before as unknown as Record<string, unknown>,
 				after_state: data,
 			});
@@ -208,7 +209,7 @@ export function useUpdateAsset() {
 
 export function useChangeAssetStatus() {
 	const qc = useQueryClient();
-	const { user } = useAuth();
+	const { user, profile } = useAuth();
 
 	return useMutation({
 		mutationFn: async ({
@@ -222,6 +223,7 @@ export function useChangeAssetStatus() {
 			before: Asset;
 			extra?: Partial<Asset>;
 		}) => {
+			const actorId = profile?.id ?? user!.id;
 			const updates: Partial<Asset> = { status: newStatus, ...extra };
 			const { data, error } = await supabase
 				.from('assets')
@@ -234,7 +236,7 @@ export function useChangeAssetStatus() {
 			await insertAuditLog({
 				asset_id: id,
 				action: 'status_changed',
-				actor_id: user!.id,
+				actor_id: actorId,
 				before_state: { status: before.status },
 				after_state: { status: newStatus },
 			});
@@ -243,7 +245,7 @@ export function useChangeAssetStatus() {
 				await insertAuditLog({
 					asset_id: id,
 					action: 'retired',
-					actor_id: user!.id,
+					actor_id: actorId,
 					after_state: { retirement_reason: extra?.retirement_reason },
 				});
 			}
