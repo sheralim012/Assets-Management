@@ -22,6 +22,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   access_denied: 'Access denied. Contact your administrator.',
   domain: 'Only @cogentlabs.co email addresses are allowed.',
   auth: 'Authentication failed. Please try again.',
+  trigger_conflict: 'Account setup issue — your profile needs a one-time fix. Contact your administrator.',
 }
 
 export function LoginPage() {
