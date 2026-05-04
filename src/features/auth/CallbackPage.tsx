@@ -35,7 +35,7 @@ export function CallbackPage() {
 			}
 
 			try {
-				const email = session.user.email ?? '';
+				const email = session.user.email?.toLowerCase() ?? '';
 				const allowedDomain =
 					import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN ?? 'cogentlabs.co';
 
@@ -45,39 +45,44 @@ export function CallbackPage() {
 					return;
 				}
 
+				// --- Step 1: look up by auth id (the normal path) ---
 				let { data: profile } = await supabase
 					.from('profiles')
 					.select('id, role, status')
 					.eq('id', session.user.id)
 					.maybeSingle();
 
-				// Retry once — DB trigger for new users can lag by ~1s
+				// Retry once — DB trigger for new users can lag ~1 s
 				if (!profile) {
-					await new Promise((resolve) => setTimeout(resolve, 1500));
-					const { data: retryProfile } = await supabase
+					await new Promise((r) => setTimeout(r, 1500));
+					const { data: retried } = await supabase
 						.from('profiles')
 						.select('id, role, status')
 						.eq('id', session.user.id)
 						.maybeSingle();
-					profile = retryProfile;
+					profile = retried;
 				}
 
-				// Manually-created profiles have a random UUID — look up by email instead
+				// --- Step 2: email fallback for profiles pre-created with a
+				//     random UUID (AddEmployeeModal) before the user's first
+				//     OAuth login. RLS NOTE: for this query to succeed when
+				//     auth.uid() has no matching row yet, the profiles SELECT
+				//     policy must include:
+				//       lower(auth.jwt()->>'email') = lower(email)
+				//     See the SQL block in the PR description. ---
 				if (!profile && email) {
 					const { data: emailProfile } = await supabase
 						.from('profiles')
 						.select('id, role, status')
-						.eq('email', email.toLowerCase())
+						.eq('email', email)
 						.maybeSingle();
 
 					if (emailProfile) {
 						const oldId = emailProfile.id;
 						const newId = session.user.id;
 
-						// FK references to profiles.id must be updated BEFORE changing
-						// the PK, otherwise the UPDATE fails with a constraint violation.
-						// assets.allotted_user_id is the only FK that can reference a
-						// pre-created profile that has never logged in.
+						// Migrate FK references BEFORE changing the PK so the
+						// profiles UPDATE doesn't fail on a constraint violation.
 						await supabase
 							.from('assets')
 							.update({ allotted_user_id: newId })
@@ -86,13 +91,14 @@ export function CallbackPage() {
 						await supabase
 							.from('profiles')
 							.update({ id: newId })
-							.eq('email', email.toLowerCase());
+							.eq('email', email);
 
 						profile = { ...emailProfile, id: newId };
 					}
 				}
 
-				if (!profile || profile.role !== 'admin') {
+				// --- Step 3: gate — role AND status must both be correct ---
+				if (!profile || profile.role !== 'admin' || profile.status !== 'active') {
 					await supabase.auth.signOut();
 					navigate('/login?error=not_admin', { replace: true });
 					return;
