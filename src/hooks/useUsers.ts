@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/features/auth/useAuth'
 import type { Profile, AuditAction } from '@/types'
 
 export interface UserAuditEntry {
@@ -72,6 +73,7 @@ export function useUserAssets(userId: string | null) {
 
 export function useCreateUser() {
   const qc = useQueryClient()
+  const { profile: currentProfile } = useAuth()
   return useMutation({
     mutationFn: async (values: {
       name: string
@@ -79,6 +81,7 @@ export function useCreateUser() {
       role: Profile['role']
       designation?: string | null
     }) => {
+      if (currentProfile?.role !== 'admin') throw new Error('Admin access required')
       const { error } = await supabase.from('profiles').insert({
         ...values,
         status: 'active',
@@ -92,15 +95,9 @@ export function useCreateUser() {
 
 export function useDeleteUser() {
   const qc = useQueryClient()
+  const { profile: currentProfile } = useAuth()
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id ?? '')
-        .single()
-
       if (currentProfile?.role !== 'admin') {
         toast.error('Only admins can delete employees')
         throw new Error('PERMISSION_DENIED')
@@ -115,11 +112,7 @@ export function useDeleteUser() {
       const { error } = await supabase.from('profiles').delete().eq('id', id)
       if (error) {
         console.error('Delete error:', error)
-        if (error.code === '42501' || error.message.includes('403')) {
-          toast.error('Permission denied. Please sign out and sign back in.')
-        } else {
-          toast.error('Failed to delete: ' + error.message)
-        }
+        toast.error('Failed to delete: ' + error.message)
         throw error
       }
     },
@@ -152,6 +145,7 @@ export function useUserAuditLog(userId: string | null) {
 
 export function useUpdateUser() {
   const qc = useQueryClient()
+  const { profile: currentProfile } = useAuth()
   return useMutation({
     mutationFn: async ({ id, values }: {
       id: string
@@ -162,6 +156,7 @@ export function useUpdateUser() {
         status: 'active' | 'inactive'
       }
     }) => {
+      if (currentProfile?.role !== 'admin') throw new Error('Admin access required')
       const { error } = await supabase.from('profiles').update(values).eq('id', id)
       if (error) throw error
     },

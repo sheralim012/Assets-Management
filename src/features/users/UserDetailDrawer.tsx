@@ -46,7 +46,7 @@ export function UserDetailDrawer({ profile, open, onClose }: UserDetailDrawerPro
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  const { user: currentUser } = useAuth()
+  const { user: currentUser, profile: currentProfile } = useAuth()
   const qc = useQueryClient()
   const { data: assets } = useUserAssets(profile?.id ?? null)
   const { data: auditLog } = useUserAuditLog(profile?.id ?? null)
@@ -58,13 +58,6 @@ export function UserDetailDrawer({ profile, open, onClose }: UserDetailDrawerPro
   async function handleDelete() {
     setDeleting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const { data: currentProfile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user?.id ?? '')
-        .single()
-
       if (currentProfile?.role !== 'admin') {
         toast.error('Only admins can delete employees')
         return
@@ -79,11 +72,7 @@ export function UserDetailDrawer({ profile, open, onClose }: UserDetailDrawerPro
       const { error } = await supabase.from('profiles').delete().eq('id', profile!.id)
       if (error) {
         console.error('Delete error:', error)
-        if (error.code === '42501' || error.message.includes('403')) {
-          toast.error('Permission denied. Please sign out and sign back in.')
-        } else {
-          toast.error('Failed to delete: ' + error.message)
-        }
+        toast.error('Failed to delete: ' + error.message)
         return
       }
 
