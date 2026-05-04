@@ -140,29 +140,26 @@ export function useCreateAsset() {
 			values: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'allotted_user'>,
 		) => {
 			const actorId = profile?.id ?? user!.id;
-			const { data, error } = await supabase
+			const newId = crypto.randomUUID();
+			const { error } = await supabase
 				.from('assets')
-				.insert({ ...values, created_by: actorId })
-				.select()
-				.single();
+				.insert({ ...values, id: newId, created_by: actorId });
 			if (error) throw error;
 
 			await insertAuditLog({
-				asset_id: data.id,
+				asset_id: newId,
 				action: 'created',
 				actor_id: actorId,
-				after_state: data,
+				after_state: { ...values, id: newId, created_by: actorId } as Record<string, unknown>,
 			});
 			if (values.allotted_user_id) {
 				await insertAuditLog({
-					asset_id: data.id,
+					asset_id: newId,
 					action: 'assigned',
 					actor_id: actorId,
 					after_state: { allotted_user_id: values.allotted_user_id },
 				});
 			}
-
-			return data;
 		},
 		onSuccess: () => qc.invalidateQueries({ queryKey: ['assets'] }),
 	});
@@ -182,12 +179,10 @@ export function useUpdateAsset() {
 			before: Asset;
 			updates: Partial<Asset>;
 		}) => {
-			const { data, error } = await supabase
+			const { error } = await supabase
 				.from('assets')
 				.update(updates)
-				.eq('id', id)
-				.select()
-				.single();
+				.eq('id', id);
 			if (error) throw error;
 
 			await insertAuditLog({
@@ -195,10 +190,8 @@ export function useUpdateAsset() {
 				action: 'updated',
 				actor_id: profile?.id ?? user!.id,
 				before_state: before as unknown as Record<string, unknown>,
-				after_state: data,
+				after_state: { ...before, ...updates } as Record<string, unknown>,
 			});
-
-			return data;
 		},
 		onSuccess: (_data, vars) => {
 			qc.invalidateQueries({ queryKey: ['assets'] });
@@ -225,12 +218,10 @@ export function useChangeAssetStatus() {
 		}) => {
 			const actorId = profile?.id ?? user!.id;
 			const updates: Partial<Asset> = { status: newStatus, ...extra };
-			const { data, error } = await supabase
+			const { error } = await supabase
 				.from('assets')
 				.update(updates)
-				.eq('id', id)
-				.select()
-				.single();
+				.eq('id', id);
 			if (error) throw error;
 
 			await insertAuditLog({
@@ -249,8 +240,6 @@ export function useChangeAssetStatus() {
 					after_state: { retirement_reason: extra?.retirement_reason },
 				});
 			}
-
-			return data;
 		},
 		onSuccess: () => {
 			qc.invalidateQueries({ queryKey: ['assets'] });
