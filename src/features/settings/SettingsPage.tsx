@@ -84,25 +84,25 @@ function CategoryCard({
       onDragEnd={() => { setDraggable(false); onDragEnd() }}
       className={`card p-4 flex flex-col gap-3 relative transition-all ${!category.is_active ? 'opacity-50' : ''} ${isDragOver ? 'ring-2 ring-[var(--color-primary)] ring-offset-2' : ''} ${isDragging ? 'opacity-40' : ''}`}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
           <button
             onMouseDown={() => setDraggable(true)}
             onMouseUp={() => setDraggable(false)}
-            className="p-1 rounded hover:bg-gray-100 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1 rounded hover:bg-gray-100 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
             title="Drag to reorder"
             aria-label="Drag handle"
           >
             <GripVertical className="w-3.5 h-3.5" />
           </button>
-          <div className={`w-10 h-10 flex items-center justify-center rounded-xl ${category.is_active ? 'bg-[var(--color-primary)]/10' : 'bg-gray-100'}`}>
+          <div className={`w-9 h-9 flex items-center justify-center rounded-xl flex-shrink-0 ${category.is_active ? 'bg-[var(--color-primary)]/10' : 'bg-gray-100'}`}>
             <Icon
-              size={22}
+              size={20}
               className={category.is_active ? 'text-[var(--color-primary)]' : 'text-gray-400'}
             />
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={() => onEdit(category)}
             className="p-1.5 rounded hover:bg-gray-100 transition-colors text-slate-400 hover:text-[var(--color-primary)]"
@@ -224,7 +224,7 @@ function SortableCategoryGroup({
   }
 
   return (
-    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))' }}>
+    <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
       {categories.map((cat) => (
         <CategoryCard
           key={cat.type_key}
@@ -343,7 +343,7 @@ export function SettingsPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))' }}>
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
             {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="card p-4 h-36 animate-pulse bg-gray-50" />
             ))}

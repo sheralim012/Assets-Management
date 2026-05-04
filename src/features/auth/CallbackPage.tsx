@@ -11,6 +11,22 @@ export function CallbackPage() {
 	const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	useEffect(() => {
+		// Supabase redirects here with ?error=... when OAuth fails at the DB level
+		// (e.g. "Database error saving new user"). Detect it immediately so we don't
+		// wait for the 8-second fallback timeout.
+		const urlParams = new URLSearchParams(window.location.search)
+		const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+		const urlError = urlParams.get('error') || hashParams.get('error')
+		if (urlError) {
+			const desc = urlParams.get('error_description') || hashParams.get('error_description') || ''
+			const isTriggerFailure = desc.toLowerCase().includes('database error saving new user')
+			navigate(
+				isTriggerFailure ? '/login?error=trigger_conflict' : '/login?error=auth',
+				{ replace: true }
+			)
+			return
+		}
+
 		async function handleSession(session: Session) {
 			// Clear the fallback timer FIRST — before any async work.
 			if (fallbackTimeoutRef.current) {
