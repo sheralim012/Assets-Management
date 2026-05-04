@@ -71,13 +71,24 @@ export function CallbackPage() {
 						.maybeSingle();
 
 					if (emailProfile) {
-						// Reconcile: update the profile's id to match the real auth user id
-						// so future logins resolve by id without needing the email fallback
+						const oldId = emailProfile.id;
+						const newId = session.user.id;
+
+						// FK references to profiles.id must be updated BEFORE changing
+						// the PK, otherwise the UPDATE fails with a constraint violation.
+						// assets.allotted_user_id is the only FK that can reference a
+						// pre-created profile that has never logged in.
+						await supabase
+							.from('assets')
+							.update({ allotted_user_id: newId })
+							.eq('allotted_user_id', oldId);
+
 						await supabase
 							.from('profiles')
-							.update({ id: session.user.id })
+							.update({ id: newId })
 							.eq('email', email.toLowerCase());
-						profile = { ...emailProfile, id: session.user.id };
+
+						profile = { ...emailProfile, id: newId };
 					}
 				}
 
