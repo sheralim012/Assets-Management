@@ -104,7 +104,7 @@ export function CallbackPage() {
 					return;
 				}
 
-				navigate('/assets', { replace: true });
+				navigate('/dashboard', { replace: true });
 			} catch (err) {
 				console.error('Auth callback error:', err);
 				navigate('/login?error=auth', { replace: true });
