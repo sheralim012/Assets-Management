@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import {
 	Menu,
 	X,
+	LayoutDashboard,
 	Package,
 	Wrench,
 	Users,
@@ -21,6 +22,7 @@ import { cn } from '@/lib/utils';
 const COLLAPSED_KEY = 'sidebar_collapsed';
 
 const navItems = [
+	{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
 	{ path: '/assets', icon: Package, label: 'Assets' },
 	{ path: '/repair', icon: Wrench, label: 'Repair', showBadge: true },
 	{ path: '/users', icon: Users, label: 'Users' },
