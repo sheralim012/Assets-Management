@@ -15,7 +15,6 @@ import { useUsers } from '@/hooks/useUsers'
 import { useCategories } from '@/hooks/useCategories'
 import { supabase } from '@/lib/supabase'
 import {
-  ASSET_TYPE_LABELS, EMPLOYEE_ASSET_TYPES, COMPANY_ASSET_TYPES,
   PTA_STATUS_OPTIONS, STATUS_OPTIONS,
 } from '@/lib/constants'
 import type { Classification, AssetType } from '@/types'
@@ -131,8 +130,8 @@ export function AddAssetModal({ open, onClose, defaultClassification, defaultTyp
       setTagNumber('')
       setLocationOpen(false)
       setLocationSearch('')
-      const types = cls === 'employee_allocated' ? EMPLOYEE_ASSET_TYPES : COMPANY_ASSET_TYPES
-      const initialType = (defaultType ?? types[0]) as AssetType
+      const filteredCats = (allCategories ?? []).filter((c) => (cls ? c.classification === cls : true) && c.is_active)
+      const initialType = (defaultType ?? filteredCats[0]?.type_key ?? 'laptop') as AssetType
       reset({
         classification: cls ?? 'employee_allocated',
         asset_type: initialType,
@@ -152,13 +151,14 @@ export function AddAssetModal({ open, onClose, defaultClassification, defaultTyp
   function handleClassificationSelect(c: Classification) {
     setClassification(c)
     setValue('classification', c)
-    const types = c === 'employee_allocated' ? EMPLOYEE_ASSET_TYPES : COMPANY_ASSET_TYPES
-    setValue('asset_type', types[0] as AssetType)
+    const firstType = (allCategories ?? []).filter((cat) => cat.classification === c && cat.is_active)[0]?.type_key ?? 'laptop'
+    setValue('asset_type', firstType as AssetType)
     setStep(2)
   }
 
-  const availableTypes = classification === 'employee_allocated' ? EMPLOYEE_ASSET_TYPES : COMPANY_ASSET_TYPES
-  const typeOptions = availableTypes.map((t: string) => ({ value: t, label: ASSET_TYPE_LABELS[t] }))
+  const typeOptions = (allCategories ?? [])
+    .filter((c) => c.classification === classification && c.is_active)
+    .map((c) => ({ value: c.type_key, label: c.label }))
 
   const filteredLocations = OFFICE_LOCATIONS.filter((l) =>
     l.toLowerCase().includes(locationSearch.toLowerCase())
@@ -310,7 +310,7 @@ export function AddAssetModal({ open, onClose, defaultClassification, defaultTyp
               <div className="flex flex-col gap-1">
                 <label className="text-xs font-medium text-[var(--color-text-secondary)]">Asset Type</label>
                 <div className="px-3 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg)] text-sm font-medium text-[var(--color-text)]">
-                  {ASSET_TYPE_LABELS[defaultType]}
+                  {(allCategories ?? []).find((c) => c.type_key === defaultType)?.label ?? defaultType}
                 </div>
               </div>
             ) : (

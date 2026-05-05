@@ -33,7 +33,8 @@ import { EditAssetModal } from './EditAssetModal';
 import { StartRepairModal } from '@/features/repair/StartRepairModal';
 import { RetireAssetModal } from './RetireAssetModal';
 import { useAssets, useDeleteAsset } from '@/hooks/useAssets';
-import { ASSET_TYPE_LABELS, STATUS_OPTIONS } from '@/lib/constants';
+import { useCategories } from '@/hooks/useCategories';
+import { STATUS_OPTIONS } from '@/lib/constants';
 import { formatPKR } from '@/lib/utils';
 import type { Asset, Classification, AssetStatus } from '@/types';
 import { Package } from 'lucide-react';
@@ -68,6 +69,8 @@ export function AssetTable({
 	const [page, setPage] = useState(1);
 	const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
 	const deleteAssetMutation = useDeleteAsset();
+	const { data: allCategories } = useCategories();
+	const categoryLabel = (allCategories ?? []).find((c) => c.type_key === assetType)?.label ?? assetType;
 
 	const { data: rawData, isLoading } = useAssets({
 		classification,
@@ -113,7 +116,7 @@ export function AssetTable({
 				</button>
 				<Button variant='primary' onClick={onAddAsset}>
 					<Plus className='w-4 h-4' />
-					Add {ASSET_TYPE_LABELS[assetType]}
+					Add {categoryLabel}
 				</Button>
 			</div>
 
@@ -121,7 +124,7 @@ export function AssetTable({
 				{/* Filters */}
 				<div className='flex items-center gap-3 p-4 border-b border-[var(--color-border)]'>
 					<h2 className='section-title flex-1'>
-						{ASSET_TYPE_LABELS[assetType]}
+						{categoryLabel}
 						{!isLoading && (
 							<span className='ml-2 text-sm font-normal text-[var(--color-text-secondary)]'>
 								Showing {total} {total === 1 ? 'asset' : 'assets'}
@@ -293,7 +296,7 @@ export function AssetTable({
 						description={
 							searchQuery
 								? 'Try adjusting your search'
-								: `No ${ASSET_TYPE_LABELS[assetType]} assets yet`
+								: `No ${categoryLabel} assets yet`
 						}
 						actionLabel='Add Asset'
 						onAction={onAddAsset}
