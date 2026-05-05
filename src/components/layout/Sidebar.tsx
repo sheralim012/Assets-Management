@@ -49,8 +49,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 					<img
 						src='/favicon.png'
 						alt='C'
-						className='h-8 w-8 object-contain mx-auto'
-						style={{ filter: 'brightness(0) invert(1)' }}
+						className='h-6 w-6 object-contain mx-auto'
+						// style={{ filter: 'brightness(0) invert(1)' }}
 					/>
 				) : (
 					<motion.div
@@ -60,13 +60,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 						className='flex items-center gap-2'
 					>
 						<img
-							src='/cogent-logo.png'
+							src='/cogent-labs-logo.webp'
 							alt='Cogent Assets'
 							className='h-7 w-auto'
-							style={{ filter: 'brightness(0) invert(1)' }}
+							// style={{ filter: 'brightness(0) invert(1)' }}
 						/>
-						<span className='text-white font-bold text-lg tracking-widest'>
-							ASSETS
+						<span
+							style={{ fontFamily: 'Playwrite NO, cursive' }}
+							className='text-white font-bold text-[1.25rem] '
+						>
+							assets
 						</span>
 					</motion.div>
 				)}
