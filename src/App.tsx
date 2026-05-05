@@ -8,6 +8,7 @@ import { LoginPage } from '@/features/auth/LoginPage'
 import { CallbackPage } from '@/features/auth/CallbackPage'
 import { ForbiddenPage } from '@/features/auth/ForbiddenPage'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { AssetsPage } from '@/features/assets/AssetsPage'
 import { RepairPage } from '@/features/repair/RepairPage'
 import { UsersPage } from '@/features/users/UsersPage'
@@ -42,7 +43,8 @@ export default function App() {
 
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
-                  <Route index element={<Navigate to="/assets" replace />} />
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/assets" element={<AssetsPage />} />
                   <Route
                     path="/repair"
@@ -79,7 +81,7 @@ export default function App() {
                 </Route>
               </Route>
 
-              <Route path="*" element={<Navigate to="/assets" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </BrowserRouter>
         </AuthProvider>

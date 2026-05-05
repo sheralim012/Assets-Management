@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import {
+	LayoutDashboard,
 	Package,
 	Wrench,
 	Users,
@@ -22,6 +23,7 @@ interface SidebarProps {
 }
 
 const navItems = [
+	{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
 	{ path: '/assets', icon: Package, label: 'Assets' },
 	{ path: '/repair', icon: Wrench, label: 'Repair', showBadge: true },
 	{ path: '/users', icon: Users, label: 'Users' },
