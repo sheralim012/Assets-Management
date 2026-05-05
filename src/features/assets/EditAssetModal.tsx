@@ -12,9 +12,9 @@ import { UserSelectDropdown } from '@/components/ui/UserSelectDropdown'
 import { assetSchema, type AssetFormValues } from '@/lib/validations'
 import { useUpdateAsset } from '@/hooks/useAssets'
 import { useUsers } from '@/hooks/useUsers'
+import { useCategories } from '@/hooks/useCategories'
 import { supabase } from '@/lib/supabase'
 import {
-  ASSET_TYPE_LABELS, EMPLOYEE_ASSET_TYPES, COMPANY_ASSET_TYPES,
   PTA_STATUS_OPTIONS, STATUS_OPTIONS, RETIREMENT_REASON_OPTIONS,
 } from '@/lib/constants'
 import type { Asset, AssetType } from '@/types'
@@ -46,6 +46,7 @@ interface EditAssetModalProps {
 export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
   const updateAsset = useUpdateAsset()
   const { data: users } = useUsers({ status: 'active' })
+  const { data: allCategories } = useCategories()
   const [tagError, setTagError] = useState<string | null>(null)
   const [serialError, setSerialError] = useState<string | null>(null)
   const [locationOpen, setLocationOpen] = useState(false)
@@ -131,9 +132,9 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
   useEffect(() => { setTagError(null) }, [assetTag])
   useEffect(() => { setSerialError(null) }, [serialNumber])
 
-  const availableTypes =
-    asset.classification === 'employee_allocated' ? EMPLOYEE_ASSET_TYPES : COMPANY_ASSET_TYPES
-  const typeOptions = availableTypes.map((t: string) => ({ value: t, label: ASSET_TYPE_LABELS[t] }))
+  const typeOptions = (allCategories ?? [])
+    .filter((c) => c.classification === asset.classification && c.is_active)
+    .map((c) => ({ value: c.type_key, label: c.label }))
 
   const filteredLocations = OFFICE_LOCATIONS.filter((l) =>
     l.toLowerCase().includes(locationSearch.toLowerCase())
