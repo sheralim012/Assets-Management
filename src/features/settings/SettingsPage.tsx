@@ -53,17 +53,17 @@ function CategoryCard({
   onDrop,
   onDragEnd,
 }: CategoryCardProps) {
-  const [prefixVal, setPrefixVal] = useState(category.tag_prefix)
+  const [prefixVal, setPrefixVal] = useState(category.tag_prefix ?? '')
   const [saving, setSaving] = useState(false)
   const [draggable, setDraggable] = useState(false)
   const Icon = getIcon(category.icon)
 
-  useEffect(() => { setPrefixVal(category.tag_prefix) }, [category.tag_prefix])
+  useEffect(() => { setPrefixVal(category.tag_prefix ?? '') }, [category.tag_prefix])
 
   async function savePrefix() {
     const cleaned = prefixVal.trim().toUpperCase()
-    if (!cleaned || cleaned === category.tag_prefix) {
-      setPrefixVal(category.tag_prefix)
+    if (!cleaned || cleaned === (category.tag_prefix ?? '')) {
+      setPrefixVal(category.tag_prefix ?? '')
       return
     }
     setSaving(true)
@@ -149,7 +149,7 @@ function CategoryCard({
             />
           </div>
           <span className="text-[10px] text-gray-400 font-mono whitespace-nowrap">
-            → {prefixVal || 'OTH'}-0001
+            {prefixVal ? `→ ${prefixVal}-0001` : 'no prefix'}
           </span>
         </div>
       </div>
