@@ -12,7 +12,7 @@ import { CATEGORY_ICON_OPTIONS } from './categoryIcons'
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
-  tag_prefix: z.string().min(1, 'Prefix is required').max(8, 'Max 8 characters'),
+  tag_prefix: z.string().max(8, 'Max 8 characters'),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -64,7 +64,7 @@ export function AddCategoryModal({ open, onClose, classification, nextSortOrder 
         classification,
         icon: selectedIcon,
         sort_order: nextSortOrder,
-        tag_prefix: values.tag_prefix.trim().toUpperCase(),
+        tag_prefix: values.tag_prefix.trim() ? values.tag_prefix.trim().toUpperCase() : null,
       })
       toast.success(`${values.name} category added`)
       handleClose()
@@ -105,16 +105,20 @@ export function AddCategoryModal({ open, onClose, classification, nextSortOrder 
           />
           <div>
             <Input
-              label="Tag Prefix *"
+              label="Tag Prefix"
               placeholder="e.g. LT, MP, CLED"
               {...register('tag_prefix', {
                 setValueAs: (v: string) => v.toUpperCase().replace(/[^A-Z0-9]/g, ''),
               })}
               error={errors.tag_prefix?.message}
             />
-            {tagPrefixVal && (
+            {tagPrefixVal ? (
               <p className="mt-1 text-[10px] text-[var(--color-text-secondary)]">
                 Preview: <span className="font-mono font-semibold">{tagPrefixVal.toUpperCase()}-0001</span>
+              </p>
+            ) : (
+              <p className="mt-1 text-[10px] text-[var(--color-text-secondary)]">
+                Leave blank if assets have mixed or non-standard tags
               </p>
             )}
           </div>

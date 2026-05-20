@@ -288,7 +288,7 @@ export function AddAssetModal({ open, onClose, defaultClassification, defaultTyp
                 tagError ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)] focus-within:border-[var(--color-primary)]'
               )}>
                 <span className="px-3 py-2 bg-gray-100 text-gray-500 font-mono text-sm border-r select-none flex items-center whitespace-nowrap">
-                  {tagPrefix ? `${tagPrefix}-` : 'TAG-'}
+                  {tagPrefix ? `${tagPrefix}-` : '#'}
                 </span>
                 <input
                   type="text"
