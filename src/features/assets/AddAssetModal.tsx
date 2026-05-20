@@ -21,6 +21,7 @@ import type { Classification, AssetType } from '@/types'
 import { cn } from '@/lib/utils'
 
 const OFFICE_LOCATIONS = [
+  "General / Not Trackable",
   "Ehmad's Office (Floor 2)",
   "Git Orbit (Floor 2)",
   "Podcast Room (Floor 2)",
@@ -31,6 +32,7 @@ const OFFICE_LOCATIONS = [
   "Docker's Deck (Floor G)",
   "Guest Room (Floor G)",
   "Ground Floor Hall",
+  "Ground Floor (Reception Area)",
   "Basement Hall",
   "First Floor Hall",
   "Second Floor Hall",
