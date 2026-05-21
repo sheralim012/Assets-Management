@@ -48,10 +48,10 @@ export function StatusDonut({ stats }: StatusDonutProps) {
   if (total === 0) return <EmptyChart />
 
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className="flex flex-col items-center gap-5" style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
       {/* Donut with centre label */}
       <div className="relative flex-shrink-0" style={{ width: 200, height: 200 }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <PieChart>
             <Pie
               data={segments}
@@ -68,6 +68,11 @@ export function StatusDonut({ stats }: StatusDonutProps) {
               {segments.map((s) => <Cell key={s.name} fill={s.color} />)}
             </Pie>
             <Tooltip
+              wrapperStyle={{ zIndex: 9999, outline: 'none' }}
+              contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', color: '#F1F5F9', zIndex: 9999 }}
+              itemStyle={{ color: '#94A3B8' }}
+              labelStyle={{ color: '#F1F5F9', fontWeight: '600', marginBottom: '4px' }}
+              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null
                 const d = payload[0].payload
@@ -134,7 +139,8 @@ export function TopCountBar({ stats }: TopCountBarProps) {
   if (top.length === 0) return <EmptyChart />
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <div style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
+    <ResponsiveContainer width="100%" height={280} style={{ overflow: 'visible' }}>
       <BarChart data={top} layout="vertical" margin={{ left: 4, right: 24, top: 4, bottom: 4 }} barSize={14}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#dee2e6" />
         <XAxis
@@ -153,7 +159,11 @@ export function TopCountBar({ stats }: TopCountBarProps) {
           tickLine={false}
         />
         <Tooltip
-          cursor={{ fill: '#eaf2f8', radius: 4 }}
+          wrapperStyle={{ zIndex: 9999, outline: 'none' }}
+          contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', color: '#F1F5F9', zIndex: 9999 }}
+          itemStyle={{ color: '#94A3B8' }}
+          labelStyle={{ color: '#F1F5F9', fontWeight: '600', marginBottom: '4px' }}
+          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
           content={({ active, payload, label }) => {
             if (!active || !payload?.length) return null
             const total = payload.reduce((s, p) => s + ((p.value as number) || 0), 0)
@@ -179,6 +189,7 @@ export function TopCountBar({ stats }: TopCountBarProps) {
         <Bar dataKey="In Repair" stackId="a" fill={CHART_COLORS.repair}    radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   )
 }
 
@@ -205,7 +216,8 @@ export function TopValueBar({ stats }: TopValueBarProps) {
   const max = top[0]?.value ?? 1
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <div style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
+    <ResponsiveContainer width="100%" height={280} style={{ overflow: 'visible' }}>
       <BarChart data={top} layout="vertical" margin={{ left: 4, right: 24, top: 4, bottom: 4 }} barSize={14}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#dee2e6" />
         <XAxis
@@ -225,7 +237,11 @@ export function TopValueBar({ stats }: TopValueBarProps) {
           tickLine={false}
         />
         <Tooltip
-          cursor={{ fill: '#eaf2f8', radius: 4 }}
+          wrapperStyle={{ zIndex: 9999, outline: 'none' }}
+          contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', color: '#F1F5F9', zIndex: 9999 }}
+          itemStyle={{ color: '#94A3B8' }}
+          labelStyle={{ color: '#F1F5F9', fontWeight: '600', marginBottom: '4px' }}
+          cursor={{ fill: 'rgba(255,255,255,0.05)' }}
           content={({ active, payload, label }) => {
             if (!active || !payload?.length) return null
             const d = payload[0].payload
@@ -244,6 +260,7 @@ export function TopValueBar({ stats }: TopValueBarProps) {
         <Bar dataKey="value" name="Total Value" fill={CHART_COLORS.primary} radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
+    </div>
   )
 }
 
@@ -266,9 +283,9 @@ export function ClassificationPie({ employeeTotal, companyTotal, employeeValue, 
   if (total === 0) return <EmptyChart />
 
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className="flex flex-col items-center gap-5" style={{ position: 'relative', zIndex: 1, overflow: 'visible' }}>
       <div className="relative flex-shrink-0" style={{ width: 200, height: 200 }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" style={{ overflow: 'visible' }}>
           <PieChart>
             <Pie
               data={segments}
@@ -285,6 +302,11 @@ export function ClassificationPie({ employeeTotal, companyTotal, employeeValue, 
               {segments.map((s) => <Cell key={s.name} fill={s.color} />)}
             </Pie>
             <Tooltip
+              wrapperStyle={{ zIndex: 9999, outline: 'none' }}
+              contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)', color: '#F1F5F9', zIndex: 9999 }}
+              itemStyle={{ color: '#94A3B8' }}
+              labelStyle={{ color: '#F1F5F9', fontWeight: '600', marginBottom: '4px' }}
+              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null
                 const d = payload[0].payload

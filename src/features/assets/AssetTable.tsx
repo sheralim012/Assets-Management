@@ -41,7 +41,7 @@ import { Package } from 'lucide-react';
 
 interface AssetTableProps {
 	classification: Classification;
-	assetType: string;
+	assetType: string | null;
 	onBack: () => void;
 	onAddAsset: () => void;
 	statusFilter: string;
@@ -70,11 +70,13 @@ export function AssetTable({
 	const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
 	const deleteAssetMutation = useDeleteAsset();
 	const { data: allCategories } = useCategories();
-	const categoryLabel = (allCategories ?? []).find((c) => c.type_key === assetType)?.label ?? assetType;
+	const categoryLabel = assetType
+		? ((allCategories ?? []).find((c) => c.type_key === assetType)?.label ?? assetType)
+		: 'All Assets';
 
 	const { data: rawData, isLoading } = useAssets({
 		classification,
-		asset_type: assetType,
+		asset_type: assetType ?? undefined,
 		status: statusFilter !== 'all' ? (statusFilter as AssetStatus) : undefined,
 	});
 
@@ -82,13 +84,16 @@ export function AssetTable({
 	const assets = [...(rawData ?? [])]
 		.filter((a) => {
 			if (!searchQuery) return true;
+			const catName = (allCategories ?? []).find((c) => c.type_key === a.asset_type)?.label ?? '';
 			return (
 				a.asset_tag.toLowerCase().includes(searchLower) ||
 				(a.specs ?? '').toLowerCase().includes(searchLower) ||
+				(a.manufacturer ?? '').toLowerCase().includes(searchLower) ||
 				(a.serial_number ?? '').toLowerCase().includes(searchLower) ||
 				(a.allotted_user?.name ?? '').toLowerCase().includes(searchLower) ||
 				(a.allotted_user?.email ?? '').toLowerCase().includes(searchLower) ||
-				(a.location ?? '').toLowerCase().includes(searchLower)
+				(a.location ?? '').toLowerCase().includes(searchLower) ||
+				catName.toLowerCase().includes(searchLower)
 			);
 		})
 		.sort((a, b) => a.asset_tag.localeCompare(b.asset_tag));
@@ -112,11 +117,11 @@ export function AssetTable({
 					className='flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors font-medium'
 				>
 					<ArrowLeft className='w-4 h-4' />
-					All Categories
+					{assetType ? 'All Categories' : 'Clear Search'}
 				</button>
 				<Button variant='primary' onClick={onAddAsset}>
 					<Plus className='w-4 h-4' />
-					Add {categoryLabel}
+					{assetType ? `Add ${categoryLabel}` : 'Add Asset'}
 				</Button>
 			</div>
 
@@ -127,7 +132,9 @@ export function AssetTable({
 						{categoryLabel}
 						{!isLoading && (
 							<span className='ml-2 text-sm font-normal text-[var(--color-text-secondary)]'>
-								Showing {total} {total === 1 ? 'asset' : 'assets'}
+								{searchQuery
+									? `${total} ${total === 1 ? 'result' : 'results'} for "${searchQuery}"`
+									: `Showing ${total} ${total === 1 ? 'asset' : 'assets'}`}
 							</span>
 						)}
 					</h2>
