@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
+import { SearchInput } from '@/components/ui/SearchInput'
 import { AssetCategoryGrid } from './AssetCategoryGrid'
 import { AssetTable } from './AssetTable'
 import { AddAssetModal } from './AddAssetModal'
@@ -31,7 +32,6 @@ export function AssetsPage() {
     setActiveTab(tab)
     setSelectedType(null)
     setStatusFilter('all')
-    setSearchQuery('')
   }
 
   function handleSelectType(type: string) {
@@ -56,6 +56,16 @@ export function AssetsPage() {
           </Button>
         }
       />
+
+      {/* Global search */}
+      <div className="mb-5">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search by tag, description, location..."
+          className="w-full max-w-md"
+        />
+      </div>
 
       {/* Tabs */}
       <div className="flex border-b border-[var(--color-border)] mb-6 gap-1">
@@ -82,7 +92,7 @@ export function AssetsPage() {
 
       {/* Grid or Table */}
       <AnimatePresence mode="wait">
-        {!selectedType ? (
+        {!selectedType && !searchQuery ? (
           <motion.div
             key="grid"
             initial={{ opacity: 0, y: 6 }}
@@ -107,7 +117,7 @@ export function AssetsPage() {
             <AssetTable
               classification={activeTab}
               assetType={selectedType}
-              onBack={() => setSelectedType(null)}
+              onBack={() => { setSelectedType(null); setSearchQuery('') }}
               onAddAsset={() => setAddModalOpen(true)}
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}

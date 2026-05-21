@@ -21,22 +21,20 @@ import type { Asset, AssetType } from '@/types'
 
 const OFFICE_LOCATIONS = [
   "General / Not Trackable",
-  "Ehmad's Office (Floor 2)",
-  "Git Orbit (Floor 2)",
-  "Podcast Room (Floor 2)",
+  "Basement Hall",
   "Django's Den (Floor B)",
-  "Sher's Office (Floor B)",
-  "Ahmed's Office (Floor G)",
-  "Python Penthouse (Floor 2)",
-  "Docker's Deck (Floor G)",
-  "Guest Room (Floor G)",
+  "Ehmad's Office (Floor 2)",
+  "First Floor Hall",
+  "Git Orbit (Floor 2)",
   "Ground Floor Hall",
   "Ground Floor (Reception Area)",
-  "Basement Hall",
-  "First Floor Hall",
-  "Second Floor Hall",
-  "Third Floor Hall",
+  "Ground Floor (Guest Room)",
+  "Podcast Room (Floor 2)",
+  "React Retreat (Floor B)",
   "Rooftop",
+  "Second Floor Hall",
+  "Sher's Office (Floor B)",
+  "Third Floor Hall",
 ]
 
 interface EditAssetModalProps {
