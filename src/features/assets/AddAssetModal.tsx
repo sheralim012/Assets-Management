@@ -22,22 +22,20 @@ import { cn } from '@/lib/utils'
 
 const OFFICE_LOCATIONS = [
   "General / Not Trackable",
-  "Ehmad's Office (Floor 2)",
-  "Git Orbit (Floor 2)",
-  "Podcast Room (Floor 2)",
+  "Basement Hall",
   "Django's Den (Floor B)",
-  "Sher's Office (Floor B)",
-  "Ahmed's Office (Floor G)",
-  "Python Penthouse (Floor 2)",
-  "Docker's Deck (Floor G)",
-  "Guest Room (Floor G)",
+  "Ehmad's Office (Floor 2)",
+  "First Floor Hall",
+  "Git Orbit (Floor 2)",
   "Ground Floor Hall",
   "Ground Floor (Reception Area)",
-  "Basement Hall",
-  "First Floor Hall",
-  "Second Floor Hall",
-  "Third Floor Hall",
+  "Ground Floor (Guest Room)",
+  "Podcast Room (Floor 2)",
+  "React Retreat (Floor B)",
   "Rooftop",
+  "Second Floor Hall",
+  "Sher's Office (Floor B)",
+  "Third Floor Hall",
 ]
 
 interface AddAssetModalProps {
@@ -285,24 +283,40 @@ export function AddAssetModal({ open, onClose, defaultClassification, defaultTyp
               <label className="text-xs font-medium text-[var(--color-text-secondary)] mb-1.5 block">
                 Asset Tag *
               </label>
-              <div className={cn(
-                'flex rounded-lg border overflow-hidden transition-colors',
-                tagError ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)] focus-within:border-[var(--color-primary)]'
-              )}>
-                <span className="px-3 py-2 bg-gray-100 text-gray-500 font-mono text-sm border-r select-none flex items-center whitespace-nowrap">
-                  {tagPrefix ? `${tagPrefix}-` : '#'}
-                </span>
+              {tagPrefix ? (
+                <div className={cn(
+                  'flex rounded-lg border overflow-hidden transition-colors',
+                  tagError ? 'border-[var(--color-danger)]' : 'border-[var(--color-border)] focus-within:border-[var(--color-primary)]'
+                )}>
+                  <span className="px-3 py-2 bg-gray-100 text-gray-500 font-mono text-sm border-r select-none flex items-center whitespace-nowrap">
+                    {tagPrefix}-
+                  </span>
+                  <input
+                    type="text"
+                    value={tagNumber}
+                    onChange={(e) => {
+                      setTagNumber(e.target.value.replace(/[^0-9A-Za-z]/g, '').toUpperCase())
+                      setTagError(null)
+                    }}
+                    placeholder="0081"
+                    className="flex-1 px-3 py-2 text-sm font-mono focus:outline-none min-w-0 bg-white"
+                  />
+                </div>
+              ) : (
                 <input
                   type="text"
                   value={tagNumber}
                   onChange={(e) => {
-                    setTagNumber(e.target.value.replace(/[^0-9A-Za-z]/g, '').toUpperCase())
+                    setTagNumber(e.target.value)
                     setTagError(null)
                   }}
-                  placeholder="0081"
-                  className="flex-1 px-3 py-2 text-sm font-mono focus:outline-none min-w-0 bg-white"
+                  placeholder="e.g. MIC-PDR1-002"
+                  className={cn(
+                    'input-field font-mono w-full',
+                    tagError ? 'border-[var(--color-danger)]' : ''
+                  )}
                 />
-              </div>
+              )}
               {tagError && (
                 <p className="mt-1 text-xs text-[var(--color-danger)] font-medium">{tagError}</p>
               )}

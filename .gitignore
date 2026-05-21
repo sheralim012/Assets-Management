@@ -25,3 +25,4 @@ data/output/
 *.njsproj
 *.sln
 *.sw?
+.claude/
