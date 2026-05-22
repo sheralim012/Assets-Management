@@ -2,13 +2,14 @@ import { useEffect, useState, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Paperclip } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { UserSelectDropdown } from '@/components/ui/UserSelectDropdown';
+import { AssetFileUploader } from '@/components/assets/AssetFileUploader';
 import { assetSchema, type AssetFormValues } from '@/lib/validations';
 import { useUpdateAsset } from '@/hooks/useAssets';
 import { useUsers } from '@/hooks/useUsers';
@@ -223,7 +224,10 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 				</>
 			}
 		>
-			<form className='space-y-4' onSubmit={handleSubmit(onSubmit)}>
+			<form
+				className='space-y-4 pb-6 border-b border-[var(--color-border)]'
+				onSubmit={handleSubmit(onSubmit)}
+			>
 				<div className='grid grid-cols-2 gap-4'>
 					<div>
 						<Input
@@ -451,6 +455,16 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 					</div>
 				)}
 			</form>
+
+			<div className='mt-6'>
+				<div className='flex items-center gap-2 mb-3'>
+					<Paperclip className='w-4 h-4 text-[var(--color-text-secondary)]' />
+					<h3 className='text-sm font-semibold text-[var(--color-text)]'>
+						Files & Documents
+					</h3>
+				</div>
+				<AssetFileUploader assetId={asset.id} />
+			</div>
 		</Modal>
 	);
 }

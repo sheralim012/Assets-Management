@@ -2,13 +2,14 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { Building2, User, ChevronDown } from 'lucide-react';
+import { Building2, User, ChevronDown, Paperclip } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { UserSelectDropdown } from '@/components/ui/UserSelectDropdown';
+import { AssetFileUploader } from '@/components/assets/AssetFileUploader';
 import { assetSchema, type AssetFormValues } from '@/lib/validations';
 import { useCreateAsset } from '@/hooks/useAssets';
 import { useUsers } from '@/hooks/useUsers';
@@ -59,6 +60,8 @@ export function AddAssetModal({
 	const [tagNumber, setTagNumber] = useState('');
 	const [locationOpen, setLocationOpen] = useState(false);
 	const [locationSearch, setLocationSearch] = useState('');
+	const [savedAssetId, setSavedAssetId] = useState<string | null>(null);
+	const [savedAssetTag, setSavedAssetTag] = useState<string>('');
 	const locationRef = useRef<HTMLDivElement>(null);
 
 	const { data: users } = useUsers({ status: 'active' });
@@ -218,14 +221,15 @@ export function AddAssetModal({
 		if (values.status !== 'allotted') values.allotted_user_id = null;
 
 		try {
-			await createAsset.mutateAsync({
+			const result = await createAsset.mutateAsync({
 				...values,
 				serial_number: isCompany ? null : cleanedSerial,
 				purchase_date: values.purchase_date || null,
 				created_by: '',
 			} as Parameters<typeof createAsset.mutateAsync>[0]);
 			toast.success('Asset added successfully');
-			handleClose();
+			setSavedAssetId(result.id);
+			setSavedAssetTag(values.asset_tag);
 		} catch (err: unknown) {
 			toast.error(err instanceof Error ? err.message : 'Failed to add asset');
 		}
@@ -240,6 +244,8 @@ export function AddAssetModal({
 		setSerialError(null);
 		setLocationOpen(false);
 		setLocationSearch('');
+		setSavedAssetId(null);
+		setSavedAssetTag('');
 		onClose();
 	}
 
@@ -247,10 +253,20 @@ export function AddAssetModal({
 		<Modal
 			open={open}
 			onClose={handleClose}
-			title={step === 1 ? 'Add Asset — Choose Classification' : 'Add New Asset'}
+			title={
+				savedAssetId
+					? `Files — ${savedAssetTag}`
+					: step === 1
+						? 'Add Asset — Choose Classification'
+						: 'Add New Asset'
+			}
 			size='lg'
 			footer={
-				step === 2 ? (
+				savedAssetId ? (
+					<Button variant='primary' onClick={handleClose}>
+						Done
+					</Button>
+				) : step === 2 ? (
 					<>
 						{!defaultClassification && (
 							<Button variant='secondary' onClick={() => setStep(1)}>
@@ -271,7 +287,20 @@ export function AddAssetModal({
 				) : undefined
 			}
 		>
-			{step === 1 && (
+			{savedAssetId && (
+				<div>
+					<div className='flex items-center gap-2 mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200'>
+						<Paperclip className='w-4 h-4 text-emerald-600 shrink-0' />
+						<p className='text-sm text-emerald-700'>
+							<span className='font-semibold'>{savedAssetTag}</span> was
+							created. Attach files below, or click Done to finish.
+						</p>
+					</div>
+					<AssetFileUploader assetId={savedAssetId} />
+				</div>
+			)}
+
+			{!savedAssetId && step === 1 && (
 				<div className='grid grid-cols-2 gap-4'>
 					{(
 						[
@@ -311,7 +340,7 @@ export function AddAssetModal({
 				</div>
 			)}
 
-			{step === 2 && (
+			{!savedAssetId && step === 2 && (
 				<form className='space-y-4' onSubmit={handleSubmit(onSubmit)}>
 					<div className='grid grid-cols-2 gap-4'>
 						{/* Split tag input */}

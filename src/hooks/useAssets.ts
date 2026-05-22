@@ -138,7 +138,7 @@ export function useCreateAsset() {
 	return useMutation({
 		mutationFn: async (
 			values: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'allotted_user'>,
-		) => {
+		): Promise<{ id: string }> => {
 			const actorId = profile?.id ?? user!.id;
 			const newId = crypto.randomUUID();
 			const { error } = await supabase
@@ -160,6 +160,7 @@ export function useCreateAsset() {
 					after_state: { allotted_user_id: values.allotted_user_id },
 				});
 			}
+			return { id: newId };
 		},
 		onSuccess: () => qc.invalidateQueries({ queryKey: ['assets'] }),
 	});

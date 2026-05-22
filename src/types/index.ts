@@ -117,6 +117,17 @@ export interface AuditLog {
   actor?: Pick<Profile, 'name' | 'email'>
 }
 
+export interface AssetFile {
+  id: string
+  asset_id: string
+  file_name: string
+  file_size: number
+  file_type: string
+  storage_path: string
+  uploaded_by: string
+  created_at: string
+}
+
 export interface ConsumableItem {
   id: string
   sku: string
