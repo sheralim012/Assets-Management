@@ -310,14 +310,18 @@ export function AssetFileUploader({ assetId }: AssetFileUploaderProps) {
         .upload(path, file)
       if (uploadError) throw uploadError
 
-      const { error: dbError } = await supabase.from('asset_files').insert({
-        asset_id: aid,
-        file_name: file.name,
-        file_size: file.size,
-        file_type: file.type || 'application/octet-stream',
-        storage_path: path,
-        uploaded_by: uploadedBy,
-      })
+      const { data: insertedFile, error: dbError } = await supabase
+        .from('asset_files')
+        .insert({
+          asset_id: aid,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || 'application/octet-stream',
+          storage_path: path,
+          uploaded_by: uploadedBy,
+        })
+        .select()
+        .single()
       if (dbError) throw dbError
 
       clearInterval(interval)
@@ -331,7 +335,11 @@ export function AssetFileUploader({ assetId }: AssetFileUploaderProps) {
           if (entry?.previewObjectUrl) URL.revokeObjectURL(entry.previewObjectUrl)
           return prev.filter((u) => u.localId !== localId)
         })
-        qc.invalidateQueries({ queryKey: ['asset-files', aid] })
+        // Append directly to cache — avoids a refetch that would flash the loading state
+        qc.setQueryData(['asset-files', aid], (old: AssetFile[] | undefined) => [
+          ...(old ?? []),
+          insertedFile,
+        ])
         qc.invalidateQueries({ queryKey: ['asset-file-counts'] })
       }, 800)
     } catch (err) {

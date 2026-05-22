@@ -9,7 +9,6 @@ import {
 	Wrench,
 	Archive,
 	Trash2,
-	Paperclip,
 } from 'lucide-react';
 import {
 	Table,
@@ -33,11 +32,8 @@ import { AssetDetailDrawer } from './AssetDetailDrawer';
 import { EditAssetModal } from './EditAssetModal';
 import { StartRepairModal } from '@/features/repair/StartRepairModal';
 import { RetireAssetModal } from './RetireAssetModal';
-import { AssetFileUploader } from '@/components/assets/AssetFileUploader';
-import { Drawer } from '@/components/ui/Drawer';
 import { useAssets, useDeleteAsset } from '@/hooks/useAssets';
 import { useCategories } from '@/hooks/useCategories';
-import { useAssetFileCounts } from '@/hooks/useAssetFiles';
 import { STATUS_OPTIONS } from '@/lib/constants';
 import { formatPKR } from '@/lib/utils';
 import type { Asset, Classification, AssetStatus } from '@/types';
@@ -70,7 +66,6 @@ export function AssetTable({
 	const [editAsset, setEditAsset] = useState<Asset | null>(null);
 	const [repairAsset, setRepairAsset] = useState<Asset | null>(null);
 	const [retireAsset, setRetireAsset] = useState<Asset | null>(null);
-	const [filesAsset, setFilesAsset] = useState<Asset | null>(null);
 	const [page, setPage] = useState(1);
 	const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
 	const deleteAssetMutation = useDeleteAsset();
@@ -104,9 +99,6 @@ export function AssetTable({
 		.sort((a, b) => a.asset_tag.localeCompare(b.asset_tag));
 	const total = assets.length;
 	const pagedAssets = assets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-	const pagedIds = pagedAssets.map((a) => a.id);
-	const { data: fileCounts } = useAssetFileCounts(pagedIds);
-
 	useEffect(() => {
 		setPage(1);
 	}, [searchQuery, statusFilter, assetType]);
@@ -180,7 +172,6 @@ export function AssetTable({
 									: 'Location'}
 							</Th>
 							<Th>Status</Th>
-							<Th>Files</Th>
 							<Th>Actions</Th>
 						</tr>
 					</TableHead>
@@ -188,7 +179,7 @@ export function AssetTable({
 						{isLoading && (
 							<TableSkeleton
 								rows={5}
-								cols={classification === 'company_allocated' ? 9 : 10}
+								cols={classification === 'company_allocated' ? 8 : 9}
 							/>
 						)}
 						{!isLoading &&
@@ -247,26 +238,6 @@ export function AssetTable({
 									</Td>
 									<Td>
 										<AssetStatusBadge status={asset.status} />
-									</Td>
-									<Td onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-										{(() => {
-											const count = fileCounts?.[asset.id] ?? 0;
-											return (
-												<Tooltip content={count > 0 ? `${count} file${count !== 1 ? 's' : ''}` : 'Attach files'}>
-													<button
-														className='relative p-1.5 rounded hover:bg-gray-100 transition-colors text-slate-500 hover:text-[var(--color-primary)]'
-														onClick={() => setFilesAsset(asset)}
-													>
-														<Paperclip className='w-4 h-4' />
-														{count > 0 && (
-															<span className='absolute -top-0.5 -right-0.5 min-w-[14px] h-[14px] px-0.5 rounded-full bg-[var(--color-primary)] text-white text-[9px] font-bold flex items-center justify-center leading-none'>
-																{count}
-															</span>
-														)}
-													</button>
-												</Tooltip>
-											);
-										})()}
 									</Td>
 									<Td onClick={(e: React.MouseEvent) => e.stopPropagation()}>
 										<div className='flex items-center gap-1'>
@@ -380,17 +351,6 @@ export function AssetTable({
 					asset={retireAsset}
 				/>
 			)}
-
-			<Drawer
-				open={!!filesAsset}
-				onClose={() => setFilesAsset(null)}
-				title={filesAsset ? `Files — ${filesAsset.asset_tag}` : 'Files'}
-				width={520}
-			>
-				<div className='p-5'>
-					<AssetFileUploader assetId={filesAsset?.id ?? null} />
-				</div>
-			</Drawer>
 
 			<ConfirmDialog
 				open={!!deleteAsset}
