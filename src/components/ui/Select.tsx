@@ -51,8 +51,9 @@ export function Select({
             className="bg-white rounded-lg border border-[var(--color-border)] shadow-[var(--shadow-dropdown)] z-50 overflow-hidden"
             position="popper"
             sideOffset={4}
+            style={{ maxHeight: '240px' }}
           >
-            <RadixSelect.Viewport className="p-1">
+            <RadixSelect.Viewport className="p-1 overflow-y-auto" style={{ maxHeight: '238px' }}>
               {options.map((opt) => (
                 <RadixSelect.Item
                   key={opt.value}
