@@ -103,7 +103,7 @@ export interface RepairRecord {
   created_by: string
   created_at: string
   completed_at: string | null
-  asset?: Pick<Asset, 'id' | 'asset_tag' | 'asset_type' | 'specs' | 'allotted_user_id'>
+  asset?: Pick<Asset, 'id' | 'asset_tag' | 'asset_type' | 'specs' | 'allotted_user_id' | 'classification'>
 }
 
 export interface AuditLog {
