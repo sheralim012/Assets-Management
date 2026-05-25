@@ -12,6 +12,7 @@ export interface RepairHistoryRecord extends Omit<RepairRecord, 'asset'> {
     specs: string
     allotted_user_id: string | null
     allotted_user: { name: string } | null
+    classification?: string
   }
 }
 
@@ -25,7 +26,7 @@ export function useRepairs(filter: RepairsFilter = {}) {
     queryFn: async () => {
       let q = supabase
         .from('repair_records')
-        .select('*, asset:assets!asset_id(id,asset_tag,asset_type,specs,allotted_user_id)')
+        .select('*, asset:assets!asset_id(id,asset_tag,asset_type,specs,allotted_user_id,classification)')
         .order('created_at', { ascending: false })
 
       if (Array.isArray(filter.status)) {
@@ -174,7 +175,7 @@ export function useRepairHistory() {
           id, fault_description, repair_vendor_name, date_sent,
           actual_return_date, final_cost_pkr, resolved_status, completed_at,
           original_user_id,
-          asset:assets!asset_id(asset_tag, asset_type, specs)
+          asset:assets!asset_id(asset_tag, asset_type, specs, classification)
         `)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })

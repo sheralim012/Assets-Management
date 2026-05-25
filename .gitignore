@@ -27,3 +27,5 @@ data/output/
 *.sw?
 .claude/
 supabase/.temp
+data.sql
+schema.sql
