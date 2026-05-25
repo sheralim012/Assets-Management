@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Clock } from 'lucide-react'
 import { Drawer } from '@/components/ui/Drawer'
 import { AssetStatusBadge } from '@/components/shared/AssetStatusBadge'
+import { RepairStatusBadge } from '@/components/shared/RepairStatusBadge'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { useAsset, useAssetAuditLog } from '@/hooks/useAssets'
 import { useRepairs } from '@/hooks/useRepairs'
+import { useCategories } from '@/hooks/useCategories'
 import { ASSET_TYPE_LABELS } from '@/lib/constants'
 import { formatDate, formatPKR } from '@/lib/utils'
 import type { Asset } from '@/types'
@@ -25,6 +27,7 @@ export function AssetDetailDrawer({ assetId, open, onClose, onEdit }: AssetDetai
   const { data: asset, isLoading } = useAsset(assetId)
   const { data: auditLog } = useAssetAuditLog(assetId)
   const { data: repairs } = useRepairs({})
+  const { data: allCategories } = useCategories()
 
   const assetRepairs = repairs?.filter((r) => r.asset_id === assetId) ?? []
 
@@ -57,7 +60,11 @@ export function AssetDetailDrawer({ assetId, open, onClose, onEdit }: AssetDetai
             <h3 className="section-title mb-3">Asset Information</h3>
             <div className="space-y-2">
               <Row label="Asset Tag" value={<span className="font-mono font-bold text-[var(--color-primary)]">{asset.asset_tag}</span>} />
-              <Row label="Type" value={ASSET_TYPE_LABELS[asset.asset_type]} />
+              <Row label="Type" value={
+                (allCategories ?? []).find((c) => c.type_key === asset.asset_type)?.label
+                ?? ASSET_TYPE_LABELS[asset.asset_type]
+                ?? asset.asset_type
+              } />
               <Row label="Status" value={<AssetStatusBadge status={asset.status} />} />
               <Row label="Classification" value={
                 <Badge variant={asset.classification}>{asset.classification === 'employee_allocated' ? 'Employee Allocated' : 'Company Allocated'}</Badge>
@@ -74,7 +81,6 @@ export function AssetDetailDrawer({ assetId, open, onClose, onEdit }: AssetDetai
             <div className="space-y-2">
               <Row label="Vendor" value={asset.vendor_name} />
               <Row label="Phone" value={asset.vendor_phone} />
-              <Row label="Invoice" value={asset.invoice_number} />
               <Row label="Price" value={formatPKR(asset.price_pkr)} />
               <Row label="Purchase Date" value={formatDate(asset.purchase_date)} />
             </div>
@@ -109,9 +115,7 @@ export function AssetDetailDrawer({ assetId, open, onClose, onEdit }: AssetDetai
                   <div key={r.id} className="p-3 bg-[var(--color-bg)] rounded-lg text-sm">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium">{r.repair_vendor_name}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.status === 'completed' ? 'bg-[var(--color-available-light)] text-[var(--color-available)]' : 'bg-[var(--color-repair-light)] text-[var(--color-repair)]'}`}>
-                        {r.status}
-                      </span>
+                      <RepairStatusBadge status={r.status} />
                     </div>
                     <p className="text-[var(--color-text-secondary)] text-xs">{r.fault_description}</p>
                     <p className="text-[var(--color-text-secondary)] text-xs mt-1">Sent: {formatDate(r.date_sent)}</p>

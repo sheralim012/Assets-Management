@@ -1,4 +1,5 @@
 import { Drawer } from '@/components/ui/Drawer'
+import { RepairStatusBadge } from '@/components/shared/RepairStatusBadge'
 import { ASSET_TYPE_LABELS } from '@/lib/constants'
 import { formatDate, formatPKR, daysAgo } from '@/lib/utils'
 import type { RepairRecord } from '@/types'
@@ -47,10 +48,7 @@ export function RepairDetailDrawer({ repair, open, onClose }: RepairDetailDrawer
               />
               {repair.estimated_cost_pkr != null && <Row label="Estimated Cost" value={formatPKR(repair.estimated_cost_pkr)} />}
               {repair.final_cost_pkr != null && <Row label="Final Cost" value={formatPKR(repair.final_cost_pkr)} />}
-              <Row label="Warranty Claim" value={repair.warranty_claim ? 'Yes' : 'No'} />
-              {repair.warranty_claim_ref && <Row label="Warranty Ref" value={repair.warranty_claim_ref} />}
-              <Row label="Insurance Claim" value={repair.insurance_claim ? 'Yes' : 'No'} />
-              <Row label="Status" value={repair.status.replace(/_/g, ' ')} />
+              <Row label="Status" value={<RepairStatusBadge status={repair.status} />} />
             </div>
           </section>
 

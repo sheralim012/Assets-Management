@@ -69,6 +69,7 @@ export function CompleteRepairModal({ open, onClose, repair }: CompleteRepairMod
 
   async function handleSubmit() {
     setError(null)
+    if (!finalCost || parseFloat(finalCost) < 0) { setError('Final repair cost is required'); return }
     if (!newStatus) { setError('Please select a status'); return }
     if (newStatus === 'allotted' && !selectedUserId) { setError('Please select an employee'); return }
     setLoading(true)
@@ -115,12 +116,12 @@ export function CompleteRepairModal({ open, onClose, repair }: CompleteRepairMod
 
       <div className="space-y-4">
         <Input
-          label="Final Repair Cost (PKR)"
+          label="Final Repair Cost (PKR) *"
           type="number"
           min={0}
           value={finalCost}
           onChange={(e) => setFinalCost(e.target.value)}
-          placeholder="Leave blank if no cost"
+          placeholder="e.g. 5000"
         />
 
         {/* Status select */}

@@ -24,6 +24,7 @@ import { Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Tab = 'active' | 'history';
+type ClassTab = 'employee' | 'company';
 
 function getRepairDuration(
 	dateSent: string | null | undefined,
@@ -51,8 +52,6 @@ function getDaysTaken(
 	));
 }
 
-
-
 const resolvedStatusLabel: Record<string, string> = {
 	available: 'Available',
 	allotted: 'Allotted',
@@ -60,6 +59,7 @@ const resolvedStatusLabel: Record<string, string> = {
 };
 
 export function RepairPage() {
+	const [classTab, setClassTab] = useState<ClassTab>('employee');
 	const [tab, setTab] = useState<Tab>('active');
 	const [viewRepair, setViewRepair] = useState<RepairRecord | null>(null);
 	const [completeRepair, setCompleteRepair] = useState<RepairRecord | null>(
@@ -72,6 +72,14 @@ export function RepairPage() {
 	});
 	const { data: history, isLoading: loadingHistory } = useRepairHistory();
 
+	const classFilter = classTab === 'company' ? 'company_allocated' : 'employee_allocated';
+	const filteredOpen = (openRepairs ?? []).filter(
+		(r) => r.asset?.classification === classFilter,
+	);
+	const filteredHistory = (history ?? []).filter(
+		(r) => r.asset?.classification === classFilter,
+	);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 10 }}
@@ -83,7 +91,25 @@ export function RepairPage() {
 				description='All assets currently under repair'
 			/>
 
-			{/* Tabs */}
+			{/* Classification Tabs */}
+			<div className='flex gap-1 mb-3'>
+				{(['employee', 'company'] as const).map((ct) => (
+					<button
+						key={ct}
+						onClick={() => setClassTab(ct)}
+						className={cn(
+							'px-4 py-2 rounded text-sm font-medium border transition-all',
+							classTab === ct
+								? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
+								: 'bg-white text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-[var(--color-primary)]',
+						)}
+					>
+						{ct === 'employee' ? 'Employee Allocated' : 'Company Allocated'}
+					</button>
+				))}
+			</div>
+
+			{/* Active / History Tabs */}
 			<div className='flex gap-1 mb-4'>
 				{(['active', 'history'] as const).map((t) => (
 					<button
@@ -97,9 +123,9 @@ export function RepairPage() {
 						)}
 					>
 						{t === 'active' ? 'Active Repairs' : 'Repair History'}
-						{t === 'active' && openRepairs && openRepairs.length > 0 && (
+						{t === 'active' && filteredOpen.length > 0 && (
 							<span className='ml-2 min-w-5 h-5 px-1.5 rounded-full bg-white/20 text-xs font-semibold inline-flex items-center justify-center'>
-								{openRepairs.length}
+								{filteredOpen.length}
 							</span>
 						)}
 					</button>
@@ -126,7 +152,7 @@ export function RepairPage() {
 						<TableBody>
 							{loadingActive && <TableSkeleton rows={5} cols={9} />}
 							{!loadingActive &&
-								(openRepairs ?? []).map((repair) => {
+								filteredOpen.map((repair) => {
 									const duration = getRepairDuration(repair.date_sent, repair.expected_return_date);
 									const isOverdue = !!repair.expected_return_date && new Date() > new Date(repair.expected_return_date);
 									const isDueSoon = !!repair.expected_return_date && !isOverdue && getRepairDuration(new Date().toISOString(), repair.expected_return_date) <= 2;
@@ -143,7 +169,7 @@ export function RepairPage() {
 											</Td>
 											<Td>
 												{repair.asset
-													? ASSET_TYPE_LABELS[repair.asset.asset_type]
+													? (ASSET_TYPE_LABELS[repair.asset.asset_type] ?? repair.asset.asset_type)
 													: '—'}
 											</Td>
 											<Td>
@@ -204,7 +230,7 @@ export function RepairPage() {
 						</TableBody>
 					</Table>
 
-					{!loadingActive && (openRepairs ?? []).length === 0 && (
+					{!loadingActive && filteredOpen.length === 0 && (
 						<EmptyState
 							icon={Wrench}
 							title='No open repairs'
@@ -230,7 +256,7 @@ export function RepairPage() {
 								<Th>Resolved As</Th>
 								<Th>
 									<Tooltip content='The employee who had this asset when it was sent for repair'>
-										<span>Responsible User</span>
+										<span>Responsible</span>
 									</Tooltip>
 								</Th>
 							</tr>
@@ -238,7 +264,7 @@ export function RepairPage() {
 						<TableBody>
 							{loadingHistory && <TableSkeleton rows={5} cols={9} />}
 							{!loadingHistory &&
-								(history ?? []).map((repair) => {
+								filteredHistory.map((repair) => {
 									return (<Tr key={repair.id}>
 										<Td>
 											<span className='font-mono font-semibold text-[var(--color-primary)]'>
@@ -247,7 +273,7 @@ export function RepairPage() {
 										</Td>
 										<Td>
 											{repair.asset
-												? ASSET_TYPE_LABELS[repair.asset.asset_type]
+												? (ASSET_TYPE_LABELS[repair.asset.asset_type] ?? repair.asset.asset_type)
 												: '—'}
 										</Td>
 										<Td>
@@ -283,13 +309,13 @@ export function RepairPage() {
 												'—'
 											)}
 										</Td>
-										<Td>{repair.original_user?.name ?? '—'}</Td>
+										<Td>{repair.original_user?.name ?? 'Company'}</Td>
 									</Tr>
 								); })}
 						</TableBody>
 					</Table>
 
-					{!loadingHistory && (history ?? []).length === 0 && (
+					{!loadingHistory && filteredHistory.length === 0 && (
 						<EmptyState
 							icon={Wrench}
 							title='No repair history'
