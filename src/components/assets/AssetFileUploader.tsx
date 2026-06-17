@@ -18,7 +18,6 @@ import { useAuth } from '@/features/auth/useAuth'
 import { useAssetFiles } from '@/hooks/useAssetFiles'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Modal } from '@/components/ui/Modal'
-import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
 import type { AssetFile } from '@/types'
 
