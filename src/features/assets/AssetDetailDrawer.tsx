@@ -222,9 +222,9 @@ export function AssetDetailDrawer({
 						<section>
 							<h3 className='section-title mb-3'>Vendor Details</h3>
 							<div className='space-y-2'>
+								<Row label='Manufacturer' value={asset.manufacturer} />
 								<Row label='Vendor' value={asset.vendor_name} />
 								<Row label='Phone' value={asset.vendor_phone} />
-								<Row label='Invoice' value={asset.invoice_number} />
 								<Row label='Price' value={formatPKR(asset.price_pkr)} />
 								<Row
 									label='Purchase Date'
@@ -278,11 +278,7 @@ export function AssetDetailDrawer({
 												<span className='font-medium'>
 													{r.repair_vendor_name}
 												</span>
-												<span
-													className={`text-xs font-semibold px-2 py-0.5 rounded-full ${r.status === 'completed' ? 'bg-[var(--color-available-light)] text-[var(--color-available)]' : 'bg-[var(--color-repair-light)] text-[var(--color-repair)]'}`}
-												>
-													{r.status}
-												</span>
+												<RepairStatusBadge status={r.status} />
 											</div>
 											<p className='text-[var(--color-text-secondary)] text-xs'>
 												{r.fault_description}

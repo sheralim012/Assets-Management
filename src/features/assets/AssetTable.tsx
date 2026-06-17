@@ -160,6 +160,7 @@ export function AssetTable({
 						<tr>
 							<Th>#</Th>
 							<Th>Tag</Th>
+							<Th>Manufacturer</Th>
 							<Th>Specs</Th>
 							<Th>Price</Th>
 							<Th>Vendor</Th>
@@ -179,7 +180,7 @@ export function AssetTable({
 						{isLoading && (
 							<TableSkeleton
 								rows={5}
-								cols={classification === 'company_allocated' ? 8 : 9}
+								cols={classification === 'company_allocated' ? 9 : 10}
 							/>
 						)}
 						{!isLoading &&
@@ -193,6 +194,7 @@ export function AssetTable({
 											{asset.asset_tag}
 										</span>
 									</Td>
+									<Td>{asset.manufacturer ?? '—'}</Td>
 									<Td>
 										<Tooltip content={asset.specs}>
 											<span className='line-clamp-2 max-w-[200px] text-xs'>
