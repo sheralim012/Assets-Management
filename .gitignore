@@ -26,6 +26,6 @@ data/output/
 *.sln
 *.sw?
 .claude/
-supabase/.temp
 data.sql
 schema.sql
+supabase/.temp

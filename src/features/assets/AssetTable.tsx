@@ -99,7 +99,6 @@ export function AssetTable({
 		.sort((a, b) => a.asset_tag.localeCompare(b.asset_tag));
 	const total = assets.length;
 	const pagedAssets = assets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
 	useEffect(() => {
 		setPage(1);
 	}, [searchQuery, statusFilter, assetType]);

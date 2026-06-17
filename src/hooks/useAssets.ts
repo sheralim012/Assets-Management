@@ -138,7 +138,7 @@ export function useCreateAsset() {
 	return useMutation({
 		mutationFn: async (
 			values: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'allotted_user'>,
-		) => {
+		): Promise<{ id: string }> => {
 			const actorId = profile?.id ?? user!.id;
 			const newId = crypto.randomUUID();
 			const { error } = await supabase
@@ -160,6 +160,7 @@ export function useCreateAsset() {
 					after_state: { allotted_user_id: values.allotted_user_id },
 				});
 			}
+			return { id: newId };
 		},
 		onSuccess: () => qc.invalidateQueries({ queryKey: ['assets'] }),
 	});
@@ -253,6 +254,17 @@ export function useDeleteAsset() {
 
 	return useMutation({
 		mutationFn: async (id: string) => {
+			// Delete storage files first so they don't become orphaned
+			const { data: files } = await supabase
+				.from('asset_files')
+				.select('storage_path')
+				.eq('asset_id', id);
+			if (files && files.length > 0) {
+				await supabase.storage
+					.from('asset-files')
+					.remove(files.map((f) => f.storage_path));
+			}
+
 			const { error: repairErr } = await supabase
 				.from('repair_records')
 				.delete()
