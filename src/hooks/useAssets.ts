@@ -254,6 +254,17 @@ export function useDeleteAsset() {
 
 	return useMutation({
 		mutationFn: async (id: string) => {
+			// Delete storage files first so they don't become orphaned
+			const { data: files } = await supabase
+				.from('asset_files')
+				.select('storage_path')
+				.eq('asset_id', id);
+			if (files && files.length > 0) {
+				await supabase.storage
+					.from('asset-files')
+					.remove(files.map((f) => f.storage_path));
+			}
+
 			const { error: repairErr } = await supabase
 				.from('repair_records')
 				.delete()
