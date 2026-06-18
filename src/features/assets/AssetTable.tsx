@@ -34,6 +34,7 @@ import { StartRepairModal } from '@/features/repair/StartRepairModal';
 import { RetireAssetModal } from './RetireAssetModal';
 import { useAssets, useDeleteAsset } from '@/hooks/useAssets';
 import { useCategories } from '@/hooks/useCategories';
+import { useManufacturers } from '@/hooks/useManufacturers';
 import { STATUS_OPTIONS } from '@/lib/constants';
 import { formatPKR } from '@/lib/utils';
 import type { Asset, Classification, AssetStatus } from '@/types';
@@ -46,6 +47,8 @@ interface AssetTableProps {
 	onAddAsset: () => void;
 	statusFilter: string;
 	onStatusFilterChange: (v: string) => void;
+	manufacturerFilter: string;
+	onManufacturerFilterChange: (v: string) => void;
 	searchQuery: string;
 	onSearchChange: (v: string) => void;
 }
@@ -59,6 +62,8 @@ export function AssetTable({
 	onAddAsset,
 	statusFilter,
 	onStatusFilterChange,
+	manufacturerFilter,
+	onManufacturerFilterChange,
 	searchQuery,
 	onSearchChange,
 }: AssetTableProps) {
@@ -70,9 +75,15 @@ export function AssetTable({
 	const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
 	const deleteAssetMutation = useDeleteAsset();
 	const { data: allCategories } = useCategories();
+	const { manufacturers } = useManufacturers(assetType ?? undefined);
 	const categoryLabel = assetType
 		? ((allCategories ?? []).find((c) => c.type_key === assetType)?.label ?? assetType)
 		: 'All Assets';
+
+	const manufacturerOptions = [
+		{ value: 'all', label: 'All Manufacturers' },
+		...manufacturers.map((m) => ({ value: m.name, label: m.name })),
+	];
 
 	const { data: rawData, isLoading } = useAssets({
 		classification,
@@ -83,6 +94,7 @@ export function AssetTable({
 	const searchLower = searchQuery.toLowerCase();
 	const assets = [...(rawData ?? [])]
 		.filter((a) => {
+			if (manufacturerFilter !== 'all' && (a.manufacturer ?? '') !== manufacturerFilter) return false;
 			if (!searchQuery) return true;
 			const catName = (allCategories ?? []).find((c) => c.type_key === a.asset_type)?.label ?? '';
 			return (
@@ -101,7 +113,7 @@ export function AssetTable({
 	const pagedAssets = assets.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 	useEffect(() => {
 		setPage(1);
-	}, [searchQuery, statusFilter, assetType]);
+	}, [searchQuery, statusFilter, manufacturerFilter, assetType]);
 
 	return (
 		<motion.div
@@ -142,6 +154,13 @@ export function AssetTable({
 						onChange={onSearchChange}
 						placeholder='Search tag, specs, serial...'
 						className='w-64'
+					/>
+					<Select
+						options={manufacturerOptions}
+						value={manufacturerFilter}
+						onValueChange={onManufacturerFilterChange}
+						placeholder='All Manufacturers'
+						className='w-48'
 					/>
 					<Select
 						options={[
