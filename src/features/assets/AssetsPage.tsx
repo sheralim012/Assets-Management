@@ -19,6 +19,7 @@ export function AssetsPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [manufacturerFilter, setManufacturerFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
 
   const { data: assets } = useAssets({ classification: activeTab })
@@ -32,11 +33,13 @@ export function AssetsPage() {
     setActiveTab(tab)
     setSelectedType(null)
     setStatusFilter('all')
+    setManufacturerFilter('all')
   }
 
   function handleSelectType(type: string) {
     setSelectedType(type)
     setStatusFilter('all')
+    setManufacturerFilter('all')
     setSearchQuery('')
   }
 
@@ -117,10 +120,12 @@ export function AssetsPage() {
             <AssetTable
               classification={activeTab}
               assetType={selectedType}
-              onBack={() => { setSelectedType(null); setSearchQuery('') }}
+              onBack={() => { setSelectedType(null); setSearchQuery(''); setManufacturerFilter('all') }}
               onAddAsset={() => setAddModalOpen(true)}
               statusFilter={statusFilter}
               onStatusFilterChange={setStatusFilter}
+              manufacturerFilter={manufacturerFilter}
+              onManufacturerFilterChange={setManufacturerFilter}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />

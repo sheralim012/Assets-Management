@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 import { UserSelectDropdown } from '@/components/ui/UserSelectDropdown';
+import { ManufacturerSelect } from '@/components/ui/ManufacturerSelect';
 import { AssetFileUploader } from '@/components/assets/AssetFileUploader';
 import { assetSchema, type AssetFormValues } from '@/lib/validations';
 import { useUpdateAsset } from '@/hooks/useAssets';
@@ -257,11 +258,19 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 					/>
 				</div>
 
-				<Input
-					label={isCompany ? 'Manufacturer' : 'Manufacturer *'}
-					placeholder='e.g. Apple, Dell, HP, Lenovo, Samsung'
-					{...register('manufacturer')}
-					error={errors.manufacturer?.message}
+				<Controller
+					name='manufacturer'
+					control={control}
+					render={({ field }) => (
+						<ManufacturerSelect
+							label={isCompany ? 'Manufacturer' : 'Manufacturer *'}
+							value={field.value ?? ''}
+							onChange={field.onChange}
+							assetType={assetType}
+							classification={asset.classification}
+							error={errors.manufacturer?.message}
+						/>
+					)}
 				/>
 
 				<div className='grid grid-cols-2 gap-4'>
