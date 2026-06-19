@@ -38,6 +38,7 @@ const OFFICE_LOCATIONS = [
 	"Ahmed's Office (Floor G)",
 	"Sher's Office (Floor B)",
 	'Third Floor Hall',
+	'Ground Floor Parking Area',
 ];
 
 interface AddAssetModalProps {
