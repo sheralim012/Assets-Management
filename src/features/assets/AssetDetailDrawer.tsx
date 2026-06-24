@@ -255,6 +255,21 @@ export function AssetDetailDrawer({
 							</section>
 						)}
 
+						{asset.status === 'retired' && asset.retirement_reason && (
+							<section>
+								<h3 className='section-title mb-3'>Retirement</h3>
+								<div className='space-y-2'>
+									<Row
+										label='Reason'
+										value={asset.retirement_reason.replace(/_/g, ' ')}
+									/>
+									{asset.retirement_reason === 'sold' && (
+										<Row label='Sale Price' value={formatPKR(asset.sale_price)} />
+									)}
+								</div>
+							</section>
+						)}
+
 						{asset.location && (
 							<section>
 								<h3 className='section-title mb-3'>Location</h3>

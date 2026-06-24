@@ -89,6 +89,7 @@ export const RETIREMENT_REASON_OPTIONS = [
   { value: 'replaced', label: 'Replaced' },
   { value: 'stolen', label: 'Stolen' },
   { value: 'lost', label: 'Lost' },
+  { value: 'sold', label: 'Sold' },
 ]
 
 export const ENGAGEMENT_TYPE_OPTIONS = [

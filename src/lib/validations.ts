@@ -17,9 +17,13 @@ export const assetSchema = z
     allotted_user_id: z.string().uuid().nullable().optional(),
     location: z.string().nullable().optional(),
     status: z.enum(['available', 'allotted', 'in_repair', 'retired']),
-    retirement_reason: z.enum(['end_of_life', 'beyond_repair', 'replaced', 'stolen', 'lost']).nullable().optional(),
+    retirement_reason: z.enum(['end_of_life', 'beyond_repair', 'replaced', 'stolen', 'lost', 'sold']).nullable().optional(),
+    sale_price: z.number().nullable().optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.retirement_reason === 'sold' && (data.sale_price == null || data.sale_price <= 0)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Sale price is required and must be greater than 0', path: ['sale_price'] })
+    }
     if (data.classification === 'employee_allocated' && !data.manufacturer) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Manufacturer is required', path: ['manufacturer'] })
     }

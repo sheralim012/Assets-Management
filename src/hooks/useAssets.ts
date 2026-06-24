@@ -160,9 +160,39 @@ export function useCreateAsset() {
 					after_state: { allotted_user_id: values.allotted_user_id },
 				});
 			}
+
+			if (values.status === 'in_repair') {
+				const today = new Date().toISOString().slice(0, 10);
+				const expected = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+					.toISOString()
+					.slice(0, 10);
+				const { error: repairErr } = await supabase.from('repair_records').insert({
+					asset_id: newId,
+					fault_description: 'Pending — added during asset creation',
+					repair_vendor_name: 'Pending',
+					repair_vendor_phone: 'Pending',
+					date_sent: today,
+					expected_return_date: expected,
+					damage_cause: 'unknown',
+					status: 'open',
+					created_by: actorId,
+					original_user_id: values.allotted_user_id ?? null,
+				});
+				if (repairErr) throw repairErr;
+				await insertAuditLog({
+					asset_id: newId,
+					action: 'repair_opened',
+					actor_id: actorId,
+					after_state: { source: 'asset_creation' },
+				});
+			}
+
 			return { id: newId };
 		},
-		onSuccess: () => qc.invalidateQueries({ queryKey: ['assets'] }),
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ['assets'] });
+			qc.invalidateQueries({ queryKey: ['repairs'] });
+		},
 	});
 }
 

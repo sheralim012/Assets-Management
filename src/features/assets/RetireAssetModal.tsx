@@ -4,6 +4,7 @@ import { Archive } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { Input } from '@/components/ui/Input'
 import { useChangeAssetStatus } from '@/hooks/useAssets'
 import { RETIREMENT_REASON_OPTIONS } from '@/lib/constants'
 import type { Asset } from '@/types'
@@ -14,17 +15,37 @@ interface RetireAssetModalProps {
   asset: Asset
 }
 
+interface FormValues {
+  retirement_reason: string
+  sale_price?: number | null
+}
+
 export function RetireAssetModal({ open, onClose, asset }: RetireAssetModalProps) {
   const changeStatus = useChangeAssetStatus()
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<{ retirement_reason: string }>()
+  const { control, register, handleSubmit, watch, reset, formState: { errors } } = useForm<FormValues>()
+  const reason = watch('retirement_reason')
 
-  async function onSubmit(values: { retirement_reason: string }) {
+  async function onSubmit(values: FormValues) {
+    if (values.retirement_reason === 'sold') {
+      const price = Number(values.sale_price)
+      if (!price || price <= 0) {
+        toast.error('Sale price is required and must be greater than 0')
+        return
+      }
+    }
+    const salePrice =
+      values.retirement_reason === 'sold' ? parseFloat(String(values.sale_price)) || null : null
+    const extra = {
+      retirement_reason: values.retirement_reason as Asset['retirement_reason'],
+      sale_price: salePrice,
+    }
+    console.log('[RetireAsset] PATCH payload', { id: asset.id, status: 'retired', ...extra })
     try {
       await changeStatus.mutateAsync({
         id: asset.id,
         newStatus: 'retired',
         before: asset,
-        extra: { retirement_reason: values.retirement_reason as Asset['retirement_reason'] },
+        extra,
       })
       toast.success('Asset retired')
       reset()
@@ -87,6 +108,21 @@ export function RetireAssetModal({ open, onClose, asset }: RetireAssetModalProps
             />
           )}
         />
+
+        {reason === 'sold' && (
+          <Input
+            label="Sale Price (PKR) *"
+            type="number"
+            min={1}
+            step="0.01"
+            {...register('sale_price', {
+              required: 'Sale price is required',
+              valueAsNumber: true,
+              min: { value: 1, message: 'Sale price must be greater than 0' },
+            })}
+            error={errors.sale_price?.message}
+          />
+        )}
       </div>
     </Modal>
   )
