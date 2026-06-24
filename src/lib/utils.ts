@@ -49,3 +49,7 @@ export function daysAgo(dateStr: string): number {
   const now = new Date()
   return Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
 }
+
+export function formatAssetTag(value: string): string {
+  return value.toUpperCase().replace(/\s+/g, '-')
+}

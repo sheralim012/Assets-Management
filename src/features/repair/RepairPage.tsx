@@ -259,13 +259,17 @@ export function RepairPage() {
 										<span>Responsible</span>
 									</Tooltip>
 								</Th>
+								<Th>Actions</Th>
 							</tr>
 						</TableHead>
 						<TableBody>
-							{loadingHistory && <TableSkeleton rows={5} cols={9} />}
+							{loadingHistory && <TableSkeleton rows={5} cols={10} />}
 							{!loadingHistory &&
 								filteredHistory.map((repair) => {
-									return (<Tr key={repair.id}>
+									return (<Tr
+										key={repair.id}
+										onClick={() => setViewRepair(repair as unknown as RepairRecord)}
+									>
 										<Td>
 											<span className='font-mono font-semibold text-[var(--color-primary)]'>
 												{repair.asset?.asset_tag ?? '—'}
@@ -310,6 +314,18 @@ export function RepairPage() {
 											)}
 										</Td>
 										<Td>{repair.original_user?.name ?? 'Company'}</Td>
+										<Td onClick={(e: React.MouseEvent) => e.stopPropagation()}>
+											<div className='flex items-center gap-1'>
+												<Tooltip content='Edit repair'>
+													<button
+														className='p-1.5 rounded hover:bg-[var(--color-bg)] text-slate-500 hover:text-[var(--color-primary)] transition-colors'
+														onClick={() => setViewRepair(repair as unknown as RepairRecord)}
+													>
+														<Pencil className='w-4 h-4' />
+													</button>
+												</Tooltip>
+											</div>
+										</Td>
 									</Tr>
 								); })}
 						</TableBody>

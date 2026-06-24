@@ -147,21 +147,17 @@ export function useUpdateRepair() {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ repairId, values }: { repairId: string; values: import('@/lib/validations').RepairFormValues }) => {
+    mutationFn: async ({ repairId, values }: { repairId: string; values: Partial<RepairRecord> }) => {
       const { error } = await supabase
         .from('repair_records')
-        .update({
-          fault_description: values.fault_description,
-          repair_vendor_name: values.repair_vendor_name,
-          repair_vendor_phone: values.repair_vendor_phone,
-          date_sent: values.date_sent,
-          expected_return_date: values.expected_return_date,
-          estimated_cost_pkr: values.estimated_cost_pkr ?? null,
-        })
+        .update(values)
         .eq('id', repairId)
       if (error) throw error
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['repairs'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['repairs'] })
+      qc.invalidateQueries({ queryKey: ['repairs-history'] })
+    },
   })
 }
 
@@ -172,10 +168,8 @@ export function useRepairHistory() {
       const { data: repairs, error } = await supabase
         .from('repair_records')
         .select(`
-          id, fault_description, repair_vendor_name, date_sent,
-          actual_return_date, final_cost_pkr, resolved_status, completed_at,
-          original_user_id,
-          asset:assets!asset_id(asset_tag, asset_type, specs, classification)
+          *,
+          asset:assets!asset_id(id, asset_tag, asset_type, specs, allotted_user_id, classification)
         `)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false })

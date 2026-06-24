@@ -88,7 +88,8 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 			location: asset.location ?? undefined,
 			status: asset.status,
 			retirement_reason: asset.retirement_reason ?? undefined,
-		},
+			sale_price: asset.sale_price ?? undefined,
+},
 	});
 
 	useEffect(() => {
@@ -110,6 +111,7 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 				location: asset.location ?? undefined,
 				status: asset.status,
 				retirement_reason: asset.retirement_reason ?? undefined,
+				sale_price: asset.sale_price ?? undefined,
 			});
 			setTagError(null);
 			setSerialError(null);
@@ -137,6 +139,7 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 	const assetTag = watch('asset_tag');
 	const serialNumber = watch('serial_number');
 	const location = watch('location');
+	const retirementReason = watch('retirement_reason');
 
 	useEffect(() => {
 		setTagError(null);
@@ -373,19 +376,34 @@ export function EditAssetModal({ open, onClose, asset }: EditAssetModalProps) {
 				/>
 
 				{selectedStatus === 'retired' && (
-					<Controller
-						name='retirement_reason'
-						control={control}
-						render={({ field }) => (
-							<Select
-								label='Retirement Reason *'
-								options={RETIREMENT_REASON_OPTIONS}
-								value={field.value ?? 'end_of_life'}
-								onValueChange={field.onChange}
-								error={errors.retirement_reason?.message}
+					<>
+						<Controller
+							name='retirement_reason'
+							control={control}
+							render={({ field }) => (
+								<Select
+									label='Retirement Reason *'
+									options={RETIREMENT_REASON_OPTIONS}
+									value={field.value ?? 'end_of_life'}
+									onValueChange={field.onChange}
+									error={errors.retirement_reason?.message}
+								/>
+							)}
+						/>
+						{retirementReason === 'sold' && (
+							<Input
+								label='Sale Price (PKR) *'
+								type='number'
+								min={1}
+								step='0.01'
+								{...register('sale_price', {
+									valueAsNumber: true,
+									setValueAs: (v) => (v === '' || v == null ? null : Number(v)),
+								})}
+								error={errors.sale_price?.message}
 							/>
 						)}
-					/>
+					</>
 				)}
 
 				{selectedStatus === 'allotted' && !isCompany && (

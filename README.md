@@ -31,7 +31,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-App runs at `http://localhost:5173`
+App runs at `http://localhost:3000`
 
 ## 4. Environment Variables
 
@@ -89,7 +89,7 @@ To migrate from `CL___Office_Inventory.xlsx`:
 2. Set **Site URL**: `https://assets.cogentlabs.co`
 3. Add **Redirect URLs**:
    - `https://assets.cogentlabs.co/callback`
-   - `http://localhost:5173/callback`
+   - `http://localhost:3000/callback`
 
 ### Database
 Run the full SQL migration (from the project spec) in **Supabase SQL Editor**. Creates:
