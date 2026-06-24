@@ -19,7 +19,7 @@ import { useCategories } from '@/hooks/useCategories';
 import { supabase } from '@/lib/supabase';
 import { PTA_STATUS_OPTIONS, STATUS_OPTIONS } from '@/lib/constants';
 import type { Classification, AssetType } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, formatAssetTag } from '@/lib/utils';
 
 const OFFICE_LOCATIONS = [
 	'General / Not Trackable',
@@ -377,11 +377,13 @@ export function AddAssetModal({
 													type='text'
 													value={tagNumber}
 													onChange={(e) => {
-														setTagNumber(
-															e.target.value
-																.replace(/[^0-9A-Za-z]/g, '')
-																.toUpperCase(),
-														);
+														setTagNumber(formatAssetTag(e.target.value));
+														setTagError(null);
+													}}
+													onPaste={(e) => {
+														e.preventDefault();
+														const pasted = e.clipboardData.getData('text');
+														setTagNumber(formatAssetTag(pasted));
 														setTagError(null);
 													}}
 													placeholder='0081'
@@ -393,7 +395,13 @@ export function AddAssetModal({
 												type='text'
 												value={tagNumber}
 												onChange={(e) => {
-													setTagNumber(e.target.value);
+													setTagNumber(formatAssetTag(e.target.value));
+													setTagError(null);
+												}}
+												onPaste={(e) => {
+													e.preventDefault();
+													const pasted = e.clipboardData.getData('text');
+													setTagNumber(formatAssetTag(pasted));
 													setTagError(null);
 												}}
 												placeholder='e.g. MIC-PDR1-002'

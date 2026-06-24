@@ -2,7 +2,7 @@ export type Classification = 'company_allocated' | 'employee_allocated'
 export type AssetStatus = 'available' | 'allotted' | 'in_repair' | 'retired'
 export type AssetCondition = 'good' | 'fair' | 'poor' | 'dead'
 export type WarrantyType = 'manufacturer' | 'vendor' | 'none'
-export type RetirementReason = 'end_of_life' | 'beyond_repair' | 'replaced' | 'stolen' | 'lost'
+export type RetirementReason = 'end_of_life' | 'beyond_repair' | 'replaced' | 'stolen' | 'lost' | 'sold'
 export type PTAStatus = 'pta_approved' | 'non_pta' | 'unknown'
 export type RepairStatus = 'open' | 'completed' | 'vendor_unresponsive'
 export type DamageCause = 'normal_wear' | 'user_damage' | 'power_event' | 'environmental' | 'unknown'
@@ -74,6 +74,7 @@ export interface Asset {
   location: string | null
   status: AssetStatus
   retirement_reason: RetirementReason | null
+  sale_price?: number | null
   condition?: AssetCondition
   notes?: string | null
   created_by: string
