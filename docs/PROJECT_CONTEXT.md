@@ -9,6 +9,7 @@
 **Cogent Assets** is an internal asset management portal for Cogent Labs. It tracks every laptop, monitor, chair, AC, solar panel, security camera, and miscellaneous office asset across the company. Built originally as **admin-only** — only company admins (`@cogentlabs.co` Google accounts with role `admin`) can sign in and manage data.
 
 We are **currently extending it** to a **two-sided platform**:
+
 - **Admins** continue to use the existing dashboard (`/dashboard`, `/assets`, `/repair`, `/users`, `/summary`, `/settings`) and gain a new **Queries** tab.
 - **Employees** (existing `@cogentlabs.co` accounts already in `profiles` with role `employee`) get a brand new portal at `/employee/queries` to raise asset issues, request new assets, and ask for support.
 
@@ -19,33 +20,33 @@ https://docs.google.com/document/d/1WfFyOBBlHV6_Dc0Abi0K62LxL5ZR995JsIByr8McGdc/
 
 ## 2. Live Environment
 
-| Property | Value |
-|---|---|
-| Production URL | https://assets.cogentlabs.co |
-| Hosting | Vercel (auto-deploys from `main` branch) |
-| Repo | `aizaz-js/Assets-Management` |
-| Database | Supabase (project ref `acxqgxsvyhctquthfack`) |
-| Storage | Supabase Storage — bucket `asset-files` (existing) |
-| Auth | Google OAuth 2.0, domain-restricted to `@cogentlabs.co` |
-| Domain | GoDaddy → Vercel CNAME |
-| Local dev port | 3000 |
+| Property       | Value                                                   |
+| -------------- | ------------------------------------------------------- |
+| Production URL | https://assets.cogentlabs.co                            |
+| Hosting        | Vercel (auto-deploys from `main` branch)                |
+| Repo           | `aizaz-js/Assets-Management`                            |
+| Database       | Supabase (project ref `acxqgxsvyhctquthfack`)           |
+| Storage        | Supabase Storage — bucket `asset-files` (existing)      |
+| Auth           | Google OAuth 2.0, domain-restricted to `@cogentlabs.co` |
+| Domain         | GoDaddy → Vercel CNAME                                  |
+| Local dev port | 3000                                                    |
 
 ---
 
 ## 3. Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Frontend | React 18 + Vite + TypeScript |
-| Styling | Tailwind CSS |
-| State / Data | React Query (TanStack Query) |
-| Routing | React Router v6 |
-| Animation | Framer Motion *(new dependency for queries module)* |
-| Toasts | react-hot-toast *(new dependency for queries module)* |
-| Date utils | date-fns *(new dependency for queries module)* |
-| Charts | Recharts |
-| Backend | Supabase (PostgreSQL 15 + Auth + Realtime + Storage) |
-| Deployment | Vercel |
+| Layer        | Choice                                                |
+| ------------ | ----------------------------------------------------- |
+| Frontend     | React 18 + Vite + TypeScript                          |
+| Styling      | Tailwind CSS                                          |
+| State / Data | React Query (TanStack Query)                          |
+| Routing      | React Router v6                                       |
+| Animation    | Framer Motion _(new dependency for queries module)_   |
+| Toasts       | react-hot-toast _(new dependency for queries module)_ |
+| Date utils   | date-fns _(new dependency for queries module)_        |
+| Charts       | Recharts                                              |
+| Backend      | Supabase (PostgreSQL 15 + Auth + Realtime + Storage)  |
+| Deployment   | Vercel                                                |
 
 ---
 
@@ -117,6 +118,7 @@ Assets-Management/
 ### Existing tables that the queries module touches
 
 #### `profiles` (RLS now ENABLED — fixed in current session)
+
 - `id uuid` — must match `auth.users.id`
 - `name text`
 - `email text` — `@cogentlabs.co`
@@ -127,7 +129,9 @@ Assets-Management/
 **Important:** Until June 2026, `profiles` had RLS **disabled** to avoid recursion. We re-enabled it using `SECURITY DEFINER` helper functions. Helper functions: `public.is_admin(uuid)`, `public.get_my_role()`, `public.get_my_status()`.
 
 #### `assets`
+
 Primary asset table. Relevant columns for queries:
+
 - `id uuid`
 - `asset_tag text` — e.g. `LT-0042`
 - `classification text` — `employee_allocated` or `company_allocated`
@@ -138,6 +142,7 @@ Primary asset table. Relevant columns for queries:
 - Always JOIN to `profiles` for user display — never use deprecated `allotted_user_name` / `allotted_user_email` columns.
 
 #### `asset_categories`
+
 - `slug text` — used as `asset_queries.requested_category_slug` FK
 - `classification text` — employees only see `employee_allocated` categories when requesting new assets
 
@@ -145,18 +150,18 @@ Primary asset table. Relevant columns for queries:
 
 See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 
-| Table | Purpose |
-|---|---|
-| `asset_queries` | One row per query submitted by an employee |
-| `query_comments` | Timeline messages — user replies + auto system events for status changes |
-| `query_attachments` | Files attached to a query (separate from `asset_files`) |
-| `query_notifications` | Per-recipient notification rows. Drive bell badge + toast |
-| `query_activity_log` | Immutable audit log of every state change |
+| Table                 | Purpose                                                                  |
+| --------------------- | ------------------------------------------------------------------------ |
+| `asset_queries`       | One row per query submitted by an employee                               |
+| `query_comments`      | Timeline messages — user replies + auto system events for status changes |
+| `query_attachments`   | Reserved for future file upload feature — not used in V1                 |
+| `query_notifications` | Per-recipient notification rows. Drive bell badge + toast                |
+| `query_activity_log`  | Immutable audit log of every state change                                |
 
 ### Storage Buckets
 
 - `asset-files` (existing) — for asset attachments
-- `query-attachments` (new) — for query attachments, **private**, path scoped to `query_id`
+- `query-attachments` — **NOT created in V1** (file uploads deferred to V2)
 
 ---
 
@@ -166,15 +171,15 @@ See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 
 ### What Stops Each Attack
 
-| Attack | Stopped By |
-|---|---|
-| Employee modifies JS to render admin pages | Admin queries fail → empty UI, no leak |
-| Employee tries direct Supabase call to set their own role to `admin` | `users_update_own_safe_fields` policy blocks role/status changes |
-| Employee tries to read another employee's queries | `employees_read_own_queries` filters by `auth.uid()` |
-| Employee tries to write a query as someone else | `WITH CHECK (employee_id = auth.uid())` |
-| Employee tries to mark their own query as resolved | `WITH CHECK (status = 'pending')` on update |
-| Inactive user with stale session | Frontend revalidates profile on every nav, force sign-out if inactive |
-| Anonymous Supabase call | No public policies — all rejected |
+| Attack                                                               | Stopped By                                                            |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Employee modifies JS to render admin pages                           | Admin queries fail → empty UI, no leak                                |
+| Employee tries direct Supabase call to set their own role to `admin` | `users_update_own_safe_fields` policy blocks role/status changes      |
+| Employee tries to read another employee's queries                    | `employees_read_own_queries` filters by `auth.uid()`                  |
+| Employee tries to write a query as someone else                      | `WITH CHECK (employee_id = auth.uid())`                               |
+| Employee tries to mark their own query as resolved                   | `WITH CHECK (status = 'pending')` on update                           |
+| Inactive user with stale session                                     | Frontend revalidates profile on every nav, force sign-out if inactive |
+| Anonymous Supabase call                                              | No public policies — all rejected                                     |
 
 ### Frontend Hardening Rules
 
@@ -235,7 +240,7 @@ See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 1. **UUID mismatch on profiles** — Always create admins/employees by having them sign in **first** (so `auth.users` creates the row), then promoting their role. Never pre-create profiles with random UUIDs.
 2. **RLS recursion on profiles** — Use `SECURITY DEFINER` helper functions like `public.is_admin()`. Never write a policy that queries `profiles` directly inside a `profiles` policy.
 3. **Realtime channel leaks** — Always return cleanup from `useEffect`. Mount subscriptions in layout components only (one channel per session, not per render).
-4. **Storage path collision** — Use the pattern `query-attachments/{query_id}/{uuid}-{filename}` — never just the filename, or two employees uploading `screenshot.png` will collide.
+4. **Storage path collision** — Deferred, no file uploads in V1.
 5. **Allotted user display** — Never use deprecated `allotted_user_name` columns. Always JOIN `profiles` via `allotted_user_id`.
 6. **Asset categories `asset_type`** — This is a free text field (constraint was removed). Make sure inserts use a valid slug that exists in `asset_categories.slug`.
 
@@ -243,38 +248,38 @@ See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 
 ## 9. Active Admin Accounts (Reference Only)
 
-| Name | Email | Role |
-|---|---|---|
-| Aizaz Sadaqat | aizaz.sadaqat@cogentlabs.co | admin (owner) |
-| Ahmed Buksh | ahmed.buksh@cogentlabs.co | admin |
-| Ehmad Zubair | ehmad@cogentlabs.co | admin |
-| Rafia Sikander | rafia.sikander@cogentlabs.co | admin |
-| Sher Ali | sher@cogentlabs.co | admin |
-| Syed Azim Iqbal | azim.iqbal@cogentlabs.co | admin |
-| Waleed Ahmed | waleed.ahmed@cogentlabs.co | admin |
-| Waqar Ahmad | waqar.ahmad@cogentlabs.co | employee |
-| Noor Fatima | noor.fatima@cogentlabs.co | employee |
+| Name            | Email                        | Role          |
+| --------------- | ---------------------------- | ------------- |
+| Aizaz Sadaqat   | aizaz.sadaqat@cogentlabs.co  | admin (owner) |
+| Ahmed Buksh     | ahmed.buksh@cogentlabs.co    | admin         |
+| Ehmad Zubair    | ehmad@cogentlabs.co          | admin         |
+| Rafia Sikander  | rafia.sikander@cogentlabs.co | admin         |
+| Sher Ali        | sher@cogentlabs.co           | admin         |
+| Syed Azim Iqbal | azim.iqbal@cogentlabs.co     | admin         |
+| Waleed Ahmed    | waleed.ahmed@cogentlabs.co   | admin         |
+| Waqar Ahmad     | waqar.ahmad@cogentlabs.co    | employee      |
+| Noor Fatima     | noor.fatima@cogentlabs.co    | employee      |
 
 ---
 
 ## 10. Asset Tag Conventions
 
-| Prefix | Category | Classification |
-|---|---|---|
-| LT- | Laptop | Employee |
-| MP- | Mobile | Employee |
-| CLED- | Monitor | Employee |
-| MSE- | Mouse | Employee |
-| KBD- | Keyboard | Employee |
-| IP- | Tablet | Employee |
-| CH- | Chairs | Company |
-| TB- | Tables | Company |
-| FN- | Fans | Company |
-| AC- | Air Conditioners | Company |
-| SC- | Security Cameras | Company |
-| SO- | Solar Plates | Company |
-| G- | Glass / Windows | Company |
-| PDR- | Podcast Room | Company |
+| Prefix | Category         | Classification |
+| ------ | ---------------- | -------------- |
+| LT-    | Laptop           | Employee       |
+| MP-    | Mobile           | Employee       |
+| CLED-  | Monitor          | Employee       |
+| MSE-   | Mouse            | Employee       |
+| KBD-   | Keyboard         | Employee       |
+| IP-    | Tablet           | Employee       |
+| CH-    | Chairs           | Company        |
+| TB-    | Tables           | Company        |
+| FN-    | Fans             | Company        |
+| AC-    | Air Conditioners | Company        |
+| SC-    | Security Cameras | Company        |
+| SO-    | Solar Plates     | Company        |
+| G-     | Glass / Windows  | Company        |
+| PDR-   | Podcast Room     | Company        |
 
 ---
 
@@ -286,7 +291,7 @@ See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 - Employee portal at `/employee/queries`
 - Submit / edit / delete pending queries
 - Three query types: issue/fault, new asset request, support/other
-- File attachments (max 3, 10MB each)
+- ~~File attachments~~ — deferred to V2, plain text only in V1
 - Linear comment timeline (GitHub Issues style)
 - Status workflow: pending → in_progress → resolved / rejected
 - Per-admin unread tracking
@@ -302,6 +307,7 @@ See `/docs/DATABASE_MIGRATION.md` for full SQL. Summary:
 - Assigning queries to specific admins
 - SLA / escalation
 - Reopen resolved queries
+- File / image attachments (plain text only in V1)
 - Virus scanning attachments
 - Email digests
 

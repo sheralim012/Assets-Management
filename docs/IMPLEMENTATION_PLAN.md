@@ -23,19 +23,19 @@
 
 The new module must visually match the existing Cogent Assets portal exactly. The portal uses a clean, professional design with these tokens:
 
-| Token | Value | Usage |
-|---|---|---|
-| Primary | `#0F1A2B` (dark navy) | Headers, primary buttons, sidebar |
-| Accent | `#3B82F6` (blue-500) | Links, active states, focus rings |
-| Background | `#F9FAFB` | Page background |
-| Surface | `#FFFFFF` | Cards, drawers, modals |
-| Border | `#E5E7EB` | Table borders, dividers |
-| Text Primary | `#1F2937` | Body text |
-| Text Muted | `#6B7280` | Captions, labels |
-| Success | `#10B981` | Resolved status |
-| Warning | `#F59E0B` | Pending status |
-| Danger | `#EF4444` | Rejected, delete |
-| Info | `#3B82F6` | In Progress status |
+| Token        | Value                 | Usage                             |
+| ------------ | --------------------- | --------------------------------- |
+| Primary      | `#0F1A2B` (dark navy) | Headers, primary buttons, sidebar |
+| Accent       | `#3B82F6` (blue-500)  | Links, active states, focus rings |
+| Background   | `#F9FAFB`             | Page background                   |
+| Surface      | `#FFFFFF`             | Cards, drawers, modals            |
+| Border       | `#E5E7EB`             | Table borders, dividers           |
+| Text Primary | `#1F2937`             | Body text                         |
+| Text Muted   | `#6B7280`             | Captions, labels                  |
+| Success      | `#10B981`             | Resolved status                   |
+| Warning      | `#F59E0B`             | Pending status                    |
+| Danger       | `#EF4444`             | Rejected, delete                  |
+| Info         | `#3B82F6`             | In Progress status                |
 
 **Animation library:** Use `framer-motion` (install if not present). All transitions should be smooth (200–300ms ease-out). All interactive elements get hover states.
 
@@ -45,21 +45,21 @@ The new module must visually match the existing Cogent Assets portal exactly. Th
 
 ## 🗂️ Phase Overview
 
-| Phase | Focus | Est. Time | Risk |
-|---|---|---|---|
-| 0 | Pre-flight checks + dependency install | 30 min | Low |
-| 1 | Database migration (tables, triggers, RLS, storage) | 2 hours | **High** — DB changes |
-| 2 | Auth & role-based routing | 4 hours | Medium |
-| 3 | Shared hooks, types, and utilities | 3 hours | Low |
-| 4 | Shared components (badges, timeline, composer) | 4 hours | Low |
-| 5 | Employee portal (`/employee/queries/*`) | 1 day | Medium |
-| 6 | Admin Queries tab + filters + list | 6 hours | Low |
-| 7 | Admin Query detail drawer + status changes | 4 hours | Medium |
-| 8 | Notification system (bell, modal, toast) | 6 hours | Medium |
-| 9 | Realtime wiring (Supabase subscriptions) | 3 hours | **High** — cleanup matters |
-| 10 | Polish, animations, accessibility | 4 hours | Low |
-| 11 | Testing checklist + smoke tests | 2 hours | Low |
-| 12 | Deployment + rollout | 1 hour | Low |
+| Phase | Focus                                          | Est. Time | Risk                       |
+| ----- | ---------------------------------------------- | --------- | -------------------------- |
+| 0     | Pre-flight checks + dependency install         | 30 min    | Low                        |
+| 1     | Database migration (tables, triggers, RLS)     | 2 hours   | **High** — DB changes      |
+| 2     | Auth & role-based routing                      | 4 hours   | Medium                     |
+| 3     | Shared hooks, types, and utilities             | 3 hours   | Low                        |
+| 4     | Shared components (badges, timeline, composer) | 4 hours   | Low                        |
+| 5     | Employee portal (`/employee/queries/*`)        | 1 day     | Medium                     |
+| 6     | Admin Queries tab + filters + list             | 6 hours   | Low                        |
+| 7     | Admin Query detail drawer + status changes     | 4 hours   | Medium                     |
+| 8     | Notification system (bell, modal, toast)       | 6 hours   | Medium                     |
+| 9     | Realtime wiring (Supabase subscriptions)       | 3 hours   | **High** — cleanup matters |
+| 10    | Polish, animations, accessibility              | 4 hours   | Low                        |
+| 11    | Testing checklist + smoke tests                | 2 hours   | Low                        |
+| 12    | Deployment + rollout                           | 1 hour    | Low                        |
 
 ---
 
@@ -117,7 +117,7 @@ Run migrations **in this exact order** to avoid FK / policy resolution errors:
 3. Indexes
 4. Triggers and trigger functions
 5. RLS policies (enable RLS, then add policies)
-6. Storage bucket `query-attachments` + storage policies
+   > **Note:** No storage bucket needed — V1 is plain text only. The `query_attachments` table exists in the schema but will not be used until file upload is added in a future version.
 
 ### Tasks
 
@@ -140,7 +140,7 @@ Run migrations **in this exact order** to avoid FK / policy resolution errors:
 
 - [ ] All 5 tables created with correct columns and constraints
 - [ ] All RLS policies created
-- [ ] Storage bucket `query-attachments` exists, private, with policies
+- [x] Storage bucket SKIPPED — V1 is plain text only, no file uploads
 - [ ] All existing admin flows work without errors
 - [ ] No console errors in browser DevTools while navigating admin pages
 
@@ -152,14 +152,14 @@ Run migrations **in this exact order** to avoid FK / policy resolution errors:
 
 ### File Changes
 
-| File | Action |
-|---|---|
+| File                                 | Action                                                   |
+| ------------------------------------ | -------------------------------------------------------- |
 | `src/features/auth/AuthProvider.tsx` | Update to expose `role`, `status`, refetch on navigation |
-| `src/pages/CallbackPage.tsx` | Branch redirect on role |
-| `src/components/RoleGuard.tsx` | **NEW** — route-level guard component |
-| `src/App.tsx` (or router config) | Wrap routes with `RoleGuard` |
-| `src/pages/Unauthorized.tsx` | **NEW** — fallback page |
-| `src/lib/supabase.ts` | Ensure session refresh works |
+| `src/pages/CallbackPage.tsx`         | Branch redirect on role                                  |
+| `src/components/RoleGuard.tsx`       | **NEW** — route-level guard component                    |
+| `src/App.tsx` (or router config)     | Wrap routes with `RoleGuard`                             |
+| `src/pages/Unauthorized.tsx`         | **NEW** — fallback page                                  |
+| `src/lib/supabase.ts`                | Ensure session refresh works                             |
 
 ### Implementation Notes
 
@@ -227,15 +227,23 @@ export function RoleGuard({ requiredRole, children }: RoleGuardProps) {
 ```typescript
 // After Supabase session is established:
 const { data: profile } = await supabase
-  .from('profiles')
-  .select('role, status')
-  .eq('id', session.user.id)
-  .single();
+	.from('profiles')
+	.select('role, status')
+	.eq('id', session.user.id)
+	.single();
 
-if (!profile) { await signOut('Account not registered. Contact your admin.'); return; }
-if (profile.status !== 'active') { await signOut('Access deactivated.'); return; }
+if (!profile) {
+	await signOut('Account not registered. Contact your admin.');
+	return;
+}
+if (profile.status !== 'active') {
+	await signOut('Access deactivated.');
+	return;
+}
 
-navigate(profile.role === 'admin' ? '/dashboard' : '/employee/queries', { replace: true });
+navigate(profile.role === 'admin' ? '/dashboard' : '/employee/queries', {
+	replace: true,
+});
 ```
 
 ### Acceptance Criteria
@@ -256,16 +264,16 @@ navigate(profile.role === 'admin' ? '/dashboard' : '/employee/queries', { replac
 
 ### File Changes
 
-| File | Purpose |
-|---|---|
-| `src/types/queries.ts` | TypeScript types for queries, comments, notifications |
-| `src/hooks/useQueries.ts` | List queries (role-aware) |
-| `src/hooks/useQuery.ts` | Single query + comments + attachments |
-| `src/hooks/useQueryMutations.ts` | create / update / delete / addComment |
-| `src/hooks/useNotifications.ts` | List + mark-read mutations |
-| `src/hooks/useMyAssignedAssets.ts` | Employee's allotted assets |
-| `src/hooks/useEmployeeCategories.ts` | Employee-allocated categories |
-| `src/lib/queries-constants.ts` | Status/priority enums + label maps |
+| File                                 | Purpose                                               |
+| ------------------------------------ | ----------------------------------------------------- |
+| `src/types/queries.ts`               | TypeScript types for queries, comments, notifications |
+| `src/hooks/useQueries.ts`            | List queries (role-aware)                             |
+| `src/hooks/useQuery.ts`              | Single query + comments                               |
+| `src/hooks/useQueryMutations.ts`     | create / update / delete / addComment                 |
+| `src/hooks/useNotifications.ts`      | List + mark-read mutations                            |
+| `src/hooks/useMyAssignedAssets.ts`   | Employee's allotted assets                            |
+| `src/hooks/useEmployeeCategories.ts` | Employee-allocated categories                         |
+| `src/lib/queries-constants.ts`       | Status/priority enums + label maps                    |
 
 ### Type Definitions
 
@@ -277,51 +285,47 @@ export type QueryPriority = 'low' | 'medium' | 'high' | 'critical';
 export type NotificationType = 'new_query' | 'new_comment' | 'status_changed';
 
 export interface AssetQuery {
-  id: string;
-  employee_id: string;
-  employee?: { id: string; name: string; email: string };
-  query_type: QueryType;
-  asset_id: string | null;
-  asset?: { id: string; asset_tag: string; manufacturer: string; specs: string };
-  requested_category_slug: string | null;
-  requested_category?: { name: string; slug: string };
-  title: string;
-  description: string;
-  priority: QueryPriority;
-  status: QueryStatus;
-  created_at: string;
-  updated_at: string;
+	id: string;
+	employee_id: string;
+	employee?: { id: string; name: string; email: string };
+	query_type: QueryType;
+	asset_id: string | null;
+	asset?: {
+		id: string;
+		asset_tag: string;
+		manufacturer: string;
+		specs: string;
+	};
+	requested_category_slug: string | null;
+	requested_category?: { name: string; slug: string };
+	title: string;
+	description: string;
+	priority: QueryPriority;
+	status: QueryStatus;
+	created_at: string;
+	updated_at: string;
 }
 
 export interface QueryComment {
-  id: string;
-  query_id: string;
-  author_id: string;
-  author?: { name: string; role: 'admin' | 'employee' };
-  body: string;
-  is_system_message: boolean;
-  created_at: string;
+	id: string;
+	query_id: string;
+	author_id: string;
+	author?: { name: string; role: 'admin' | 'employee' };
+	body: string;
+	is_system_message: boolean;
+	created_at: string;
 }
 
-export interface QueryAttachment {
-  id: string;
-  query_id: string;
-  file_name: string;
-  file_size: number;
-  file_type: string;
-  storage_path: string;
-  uploaded_by: string;
-  created_at: string;
-}
+// QueryAttachment type reserved for future file upload feature (not used in V1)
 
 export interface QueryNotification {
-  id: string;
-  recipient_id: string;
-  query_id: string;
-  notification_type: NotificationType;
-  payload: { title?: string; from?: string; to?: string; by?: string };
-  read_at: string | null;
-  created_at: string;
+	id: string;
+	recipient_id: string;
+	query_id: string;
+	notification_type: NotificationType;
+	payload: { title?: string; from?: string; to?: string; by?: string };
+	read_at: string | null;
+	created_at: string;
 }
 ```
 
@@ -332,25 +336,30 @@ Use the same React Query pattern as existing hooks (`useAssets`, `useRepairs`). 
 ```typescript
 // src/hooks/useQueries.ts
 export function useQueries(filters?: QueryFilters) {
-  const { profile } = useAuth();
-  return useReactQuery({
-    queryKey: ['queries', profile?.id, filters],
-    queryFn: async () => {
-      let q = supabase.from('asset_queries').select(`
+	const { profile } = useAuth();
+	return useReactQuery({
+		queryKey: ['queries', profile?.id, filters],
+		queryFn: async () => {
+			let q = supabase
+				.from('asset_queries')
+				.select(
+					`
         *,
         employee:profiles!employee_id(id, name, email),
         asset:assets(id, asset_tag, manufacturer, specs)
-      `).order('created_at', { ascending: false });
+      `,
+				)
+				.order('created_at', { ascending: false });
 
-      if (filters?.status) q = q.eq('status', filters.status);
-      if (filters?.priority) q = q.eq('priority', filters.priority);
-      // ... other filters
-      const { data, error } = await q;
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!profile,
-  });
+			if (filters?.status) q = q.eq('status', filters.status);
+			if (filters?.priority) q = q.eq('priority', filters.priority);
+			// ... other filters
+			const { data, error } = await q;
+			if (error) throw error;
+			return data;
+		},
+		enabled: !!profile,
+	});
 }
 ```
 
@@ -369,21 +378,22 @@ export function useQueries(filters?: QueryFilters) {
 
 ### Components to Build
 
-| Component | File | Purpose |
-|---|---|---|
-| `StatusBadge` | `src/components/queries/StatusBadge.tsx` | Color-coded status pill |
-| `PriorityBadge` | `src/components/queries/PriorityBadge.tsx` | Color-coded priority badge |
-| `QueryTypePill` | `src/components/queries/QueryTypePill.tsx` | Icon + label for query type |
-| `QueryTimeline` | `src/components/queries/QueryTimeline.tsx` | Vertical timeline of comments + system events |
-| `CommentComposer` | `src/components/queries/CommentComposer.tsx` | Textarea + send button + keyboard shortcuts |
-| `QueryForm` | `src/components/queries/QueryForm.tsx` | Create / edit form, branches on type |
-| `AttachmentUploader` | `src/components/queries/AttachmentUploader.tsx` | Adapt existing AssetFileUploader |
-| `AttachmentPreview` | `src/components/queries/AttachmentPreview.tsx` | Inline preview for images/PDFs |
-| `EmptyState` | `src/components/queries/EmptyState.tsx` | Reusable empty state with illustration |
+| Component                | File                                         | Purpose                                       |
+| ------------------------ | -------------------------------------------- | --------------------------------------------- |
+| `StatusBadge`            | `src/components/queries/StatusBadge.tsx`     | Color-coded status pill                       |
+| `PriorityBadge`          | `src/components/queries/PriorityBadge.tsx`   | Color-coded priority badge                    |
+| `QueryTypePill`          | `src/components/queries/QueryTypePill.tsx`   | Icon + label for query type                   |
+| `QueryTimeline`          | `src/components/queries/QueryTimeline.tsx`   | Vertical timeline of comments + system events |
+| `CommentComposer`        | `src/components/queries/CommentComposer.tsx` | Textarea + send button + keyboard shortcuts   |
+| `QueryForm`              | `src/components/queries/QueryForm.tsx`       | Create / edit form, branches on type          |
+| ~~`AttachmentUploader`~~ | Skipped — no file uploads in V1              |
+| ~~`AttachmentPreview`~~  | Skipped — no file uploads in V1              |
+| `EmptyState`             | `src/components/queries/EmptyState.tsx`      | Reusable empty state with illustration        |
 
 ### Animation Specs (framer-motion)
 
 **Timeline items** — stagger fade-in:
+
 ```typescript
 <motion.div
   initial={{ opacity: 0, y: 10 }}
@@ -393,6 +403,7 @@ export function useQueries(filters?: QueryFilters) {
 ```
 
 **Status badge** — color transition on change:
+
 ```typescript
 <motion.span
   layout
@@ -402,6 +413,7 @@ export function useQueries(filters?: QueryFilters) {
 ```
 
 **Modal/drawer open** — slide + fade:
+
 ```typescript
 <motion.div
   initial={{ x: '100%', opacity: 0 }}
@@ -412,6 +424,7 @@ export function useQueries(filters?: QueryFilters) {
 ```
 
 **Hover on cards** — subtle lift:
+
 ```typescript
 whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(15,26,43,0.08)' }}
 transition={{ duration: 0.2 }}
@@ -490,7 +503,6 @@ export function StatusBadge({ status }: { status: QueryStatus }) {
 
 - Header with title, status pill, priority badge, created date
 - Asset card showing tag, manufacturer, specs (if applicable)
-- Attachments grid (clickable to preview)
 - `QueryTimeline` component
 - `CommentComposer` at bottom
 
@@ -527,7 +539,7 @@ export function EmployeeLayout() {
 - [ ] Asset dropdown only shows their own assigned, non-retired assets
 - [ ] Category dropdown shows all employee-allocated categories
 - [ ] Edit/Delete only visible on `pending` + no admin comments
-- [ ] Delete cascades (test by deleting a query with attachments)
+- [ ] Delete cascades correctly (comments removed with query)
 - [ ] All animations smooth
 - [ ] Mobile responsive (test at 360px width)
 - [ ] Empty state shows when no queries
@@ -610,8 +622,6 @@ The badge animates with a subtle pulse when count > 0:
 ├─────────────────────────────────────────────┤
 │ [Priority: High] [Status: Pending ▾]        │
 ├─────────────────────────────────────────────┤
-│ 📎 Attachments (2)                          │
-│ [screenshot.png] [error-log.pdf]            │
 ├─────────────────────────────────────────────┤
 │ ─── Timeline ───                            │
 │ ⚙️  Created · 2h ago                         │
@@ -717,7 +727,7 @@ toast.custom((t) => (
 ```typescript
 // src/lib/document-title.ts
 export function setUnreadTitle(count: number) {
-  document.title = count > 0 ? `(${count}) Cogent Assets` : 'Cogent Assets';
+	document.title = count > 0 ? `(${count}) Cogent Assets` : 'Cogent Assets';
 }
 ```
 
@@ -744,35 +754,44 @@ Call this from a `useEffect` watching unread count.
 ```typescript
 // src/hooks/useRealtimeNotifications.ts
 export function useRealtimeNotifications() {
-  const { profile } = useAuth();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+	const { profile } = useAuth();
+	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!profile) return;
+	useEffect(() => {
+		if (!profile) return;
 
-    const channel = supabase
-      .channel(`notif:${profile.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'query_notifications',
-        filter: `recipient_id=eq.${profile.id}`,
-      }, (payload) => {
-        const notif = payload.new;
-        // Invalidate count + list
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-        queryClient.invalidateQueries({ queryKey: ['queries'] });
+		const channel = supabase
+			.channel(`notif:${profile.id}`)
+			.on(
+				'postgres_changes',
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'query_notifications',
+					filter: `recipient_id=eq.${profile.id}`,
+				},
+				(payload) => {
+					const notif = payload.new;
+					// Invalidate count + list
+					queryClient.invalidateQueries({ queryKey: ['notifications'] });
+					queryClient.invalidateQueries({ queryKey: ['queries'] });
 
-        // Show toast if it's a new_query for admin
-        if (notif.notification_type === 'new_query' && profile.role === 'admin') {
-          showNewQueryToast(notif, navigate);
-        }
-      })
-      .subscribe();
+					// Show toast if it's a new_query for admin
+					if (
+						notif.notification_type === 'new_query' &&
+						profile.role === 'admin'
+					) {
+						showNewQueryToast(notif, navigate);
+					}
+				},
+			)
+			.subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [profile?.id]);
+		return () => {
+			supabase.removeChannel(channel);
+		};
+	}, [profile?.id]);
 }
 ```
 
@@ -843,7 +862,6 @@ Mount `useRealtimeNotifications()` once in `AdminLayout` and once in `EmployeeLa
 - [ ] Edit pending query before admin replies → works
 - [ ] Edit pending query after admin reply → blocked (no menu)
 - [ ] Delete pending query → cascades correctly
-- [ ] Attach files (image + PDF) → preview works
 - [ ] Reply on timeline → admin notified
 - [ ] Notification bell shows updates from admin
 
@@ -863,7 +881,6 @@ Mount `useRealtimeNotifications()` once in `AdminLayout` and once in `EmployeeLa
 
 - [ ] In browser DevTools, try to call Supabase to update own role → fails
 - [ ] In DevTools, try to read another employee's query → fails (RLS rejects)
-- [ ] Employee tries to upload to another query's storage path → fails
 - [ ] Inactive employee with cached session → forced sign-out on next nav
 
 ---
