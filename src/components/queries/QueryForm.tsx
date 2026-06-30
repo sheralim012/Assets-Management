@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Package, HelpCircle, ChevronDown } from 'lucide-react'
+import { AlertTriangle, Package, HelpCircle, ArrowLeft } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
@@ -84,7 +84,7 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
 
   const assetOptions = (myAssets ?? []).map((a) => ({
     value: a.id,
-    label: `${a.asset_tag} — ${ASSET_TYPE_LABELS[a.asset_type] ?? a.asset_type} — ${a.specs || a.manufacturer}`,
+    label: `${a.asset_tag} — ${ASSET_TYPE_LABELS[a.asset_type] ?? a.asset_type}`,
   }))
 
   const categoryOptions = (categories ?? []).map((c) => ({
@@ -98,30 +98,47 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
         {step === 1 && (
           <motion.div
             key="step1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.15 }}
           >
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">What do you need help with?</h2>
+            {/* Step indicator */}
+            <div className="flex items-center gap-2 mb-5">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
+              <span className="text-sm font-medium text-gray-500">Step 1 of 2</span>
+              <span className="text-sm text-gray-400">— Choose query type</span>
+            </div>
+
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">What do you need help with?</h2>
+            <p className="text-sm text-gray-500 mb-5">Select the type of query that best describes your request.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {TYPE_CARDS.map(({ value, label, desc, icon: Icon }) => (
                 <motion.button
                   key={value}
-                  whileHover={{ y: -2 }}
+                  whileHover={{ y: -3, boxShadow: '0 8px 25px rgba(0,0,0,0.1)' }}
+                  whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.2 }}
                   onClick={() => selectType(value)}
                   className={`
-                    p-5 rounded-lg border-2 text-left transition-all
-                    hover:border-blue-500 hover:shadow-md
-                    ${queryType === value ? 'border-blue-500 bg-blue-50/50' : 'border-gray-200 bg-white'}
+                    p-5 rounded-xl border-2 text-left transition-all
+                    hover:border-blue-500
+                    ${queryType === value ? 'border-blue-500 bg-blue-50/60 ring-2 ring-blue-200' : 'border-gray-200 bg-white'}
                   `}
                 >
-                  <Icon className="w-7 h-7 text-blue-500 mb-3" />
+                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-3">
+                    <Icon className="w-5 h-5 text-blue-600" />
+                  </div>
                   <p className="font-semibold text-gray-900 text-sm">{label}</p>
-                  <p className="text-xs text-gray-500 mt-1">{desc}</p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">{desc}</p>
                 </motion.button>
               ))}
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <Button variant="secondary" onClick={onCancel}>
+                Cancel
+              </Button>
             </div>
           </motion.div>
         )}
@@ -129,20 +146,38 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
         {step === 2 && queryType && (
           <motion.div
             key="step2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
             transition={{ duration: 0.15 }}
             className="space-y-4"
           >
-            {!initialValues?.query_type && (
-              <button
-                onClick={() => setStep(1)}
-                className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-              >
-                <ChevronDown className="w-4 h-4 rotate-90" />
-                Change query type
-              </button>
+            {/* Step indicator + back button */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">2</span>
+                <span className="text-sm font-medium text-gray-500">Step 2 of 2</span>
+                <span className="text-sm text-gray-400">— Fill in details</span>
+              </div>
+              {!initialValues?.query_type && (
+                <button
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+              )}
+            </div>
+
+            {/* Selected type chip */}
+            {queryType && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50/60 rounded-lg border border-blue-100">
+                {(() => { const tc = TYPE_CARDS.find(t => t.value === queryType); return tc ? <tc.icon className="w-4 h-4 text-blue-600" /> : null })()}
+                <span className="text-sm font-medium text-blue-800">
+                  {TYPE_CARDS.find(t => t.value === queryType)?.label}
+                </span>
+              </div>
             )}
 
             {needsAsset && (

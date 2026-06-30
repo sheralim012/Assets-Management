@@ -15,7 +15,10 @@ import { RepairPage } from '@/features/repair/RepairPage'
 import { UsersPage } from '@/features/users/UsersPage'
 import { SummaryPage } from '@/features/summary/SummaryPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
-import { EmployeeQueriesPlaceholder } from '@/features/queries/EmployeeQueriesPlaceholder'
+import { QueryListEmployee } from '@/features/queries/QueryListEmployee'
+import { NewQueryPage } from '@/features/queries/NewQueryPage'
+import { QueryDetailEmployee } from '@/features/queries/QueryDetailEmployee'
+import { EditQueryPage } from '@/features/queries/EditQueryPage'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { RoleRedirect } from '@/features/auth/RoleRedirect'
 
@@ -87,8 +90,10 @@ export default function App() {
               {/* Employee routes */}
               <Route element={<ProtectedRoute allowedRoles={['employee']} />}>
                 <Route element={<EmployeeLayout />}>
-                  <Route path="/employee/queries" element={<EmployeeQueriesPlaceholder />} />
-                  {/* More employee routes will be added in Phase 5 */}
+                  <Route path="/employee/queries" element={<QueryListEmployee />} />
+                  <Route path="/employee/queries/new" element={<NewQueryPage />} />
+                  <Route path="/employee/queries/:id" element={<QueryDetailEmployee />} />
+                  <Route path="/employee/queries/:id/edit" element={<EditQueryPage />} />
                 </Route>
               </Route>
 
