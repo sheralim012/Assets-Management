@@ -97,14 +97,22 @@ export function CallbackPage() {
 					}
 				}
 
-				// --- Step 3: gate — role AND status must both be correct ---
-				if (!profile || profile.role !== 'admin' || profile.status !== 'active') {
+				// --- Step 3: gate — must have a profile and be active ---
+				if (!profile) {
 					await supabase.auth.signOut();
-					navigate('/login?error=not_admin', { replace: true });
+					navigate('/login?error=no_account', { replace: true });
+					return;
+				}
+				if (profile.status !== 'active') {
+					await supabase.auth.signOut();
+					navigate('/login?error=inactive', { replace: true });
 					return;
 				}
 
-				navigate('/dashboard', { replace: true });
+				// Route based on role
+				const destination =
+					profile.role === 'admin' ? '/dashboard' : '/employee/queries';
+				navigate(destination, { replace: true });
 			} catch (err) {
 				console.error('Auth callback error:', err);
 				navigate('/login?error=auth', { replace: true });

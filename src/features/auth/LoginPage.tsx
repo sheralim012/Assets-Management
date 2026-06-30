@@ -31,6 +31,10 @@ const ERROR_MESSAGES: Record<string, string> = {
 	wrong_domain: 'Only @cogentlabs.co email addresses are allowed.',
 	not_admin:
 		'Access denied. Only admin users can log in to this portal. Contact your administrator.',
+	no_account:
+		'No account found for your email. Contact your administrator.',
+	inactive:
+		'Your account has been deactivated. Contact your administrator.',
 	no_session: 'Sign in failed. Please try again.',
 	access_denied: 'Access denied. Contact your administrator.',
 	domain: 'Only @cogentlabs.co email addresses are allowed.',
@@ -40,7 +44,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export function LoginPage() {
-	const { user, signIn, loading } = useAuth();
+	const { user, profile, signIn, loading } = useAuth();
 	const navigate = useNavigate();
 	const [params] = useSearchParams();
 	const [signingIn, setSigningIn] = useState(false);
@@ -51,10 +55,11 @@ export function LoginPage() {
 		: null;
 
 	useEffect(() => {
-		if (!loading && user) {
-			navigate('/assets', { replace: true });
+		if (!loading && user && profile) {
+			const dest = profile.role === 'admin' ? '/dashboard' : '/employee/queries';
+			navigate(dest, { replace: true });
 		}
-	}, [user, loading, navigate]);
+	}, [user, loading, profile, navigate]);
 
 	async function handleSignIn() {
 		setSigningIn(true);
@@ -112,7 +117,7 @@ export function LoginPage() {
 				</Button>
 
 				<p className='mt-4 text-xs text-[var(--color-text-secondary)]'>
-					Only admin accounts are permitted
+					Sign in with your @cogentlabs.co account
 				</p>
 			</motion.div>
 		</div>

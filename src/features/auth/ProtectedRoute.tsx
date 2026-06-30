@@ -24,7 +24,9 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   }
 
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
-    return <Navigate to="/403" replace />
+    // Redirect to their own home page instead of a generic 403
+    const dest = profile.role === 'employee' ? '/employee/queries' : '/dashboard'
+    return <Navigate to={dest} replace />
   }
 
   return children ? <>{children}</> : <Outlet />

@@ -1,9 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { ShieldOff } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { useAuth } from './useAuth'
 
 export function ForbiddenPage() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
+
+  const dest = profile?.role === 'employee' ? '/employee/queries' : '/dashboard'
+  const label = profile?.role === 'employee' ? 'Go to My Queries' : 'Go to Dashboard'
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center">
       <div className="card max-w-md text-center">
@@ -12,7 +18,7 @@ export function ForbiddenPage() {
         <p className="text-sm text-[var(--color-text-secondary)] mb-6">
           You don't have permission to view this page.
         </p>
-        <Button onClick={() => navigate('/assets')}>Go to Assets</Button>
+        <Button onClick={() => navigate(dest)}>{label}</Button>
       </div>
     </div>
   )
