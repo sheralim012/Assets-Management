@@ -24,6 +24,7 @@ export function useQueries(filters?: QueryFilters) {
       if (filters?.status) q = q.eq('status', filters.status)
       if (filters?.priority) q = q.eq('priority', filters.priority)
       if (filters?.query_type) q = q.eq('query_type', filters.query_type)
+      if (filters?.employee_id) q = q.eq('employee_id', filters.employee_id)
       if (filters?.search) {
         q = q.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
       }

@@ -55,4 +55,5 @@ export interface QueryFilters {
   priority?: QueryPriority
   query_type?: QueryType
   search?: string
+  employee_id?: string
 }

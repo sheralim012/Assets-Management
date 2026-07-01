@@ -6,7 +6,7 @@ import { useQueryDetail } from '@/hooks/useQueryDetail'
 import { useUpdateQuery } from '@/hooks/useQueryMutations'
 import toast from 'react-hot-toast'
 
-export function EditQueryPage() {
+export function EditQueryPage({ basePath = '/employee/queries' }: { basePath?: string }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: query, isLoading } = useQueryDetail(id ?? null)
@@ -29,7 +29,7 @@ export function EditQueryPage() {
   }
 
   if (query.status !== 'pending') {
-    navigate(`/employee/queries/${id}`, { replace: true })
+    navigate(`${basePath}/${id}`, { replace: true })
     return null
   }
 
@@ -45,7 +45,7 @@ export function EditQueryPage() {
         requested_category_slug: values.requested_category_slug,
       })
       toast.success('Query updated')
-      navigate(`/employee/queries/${id}`, { replace: true })
+      navigate(`${basePath}/${id}`, { replace: true })
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to update query')
     }
@@ -69,7 +69,7 @@ export function EditQueryPage() {
             priority: query.priority,
           }}
           onSubmit={handleSubmit}
-          onCancel={() => navigate(`/employee/queries/${id}`)}
+          onCancel={() => navigate(`${basePath}/${id}`)}
           loading={updateQuery.isPending}
           submitLabel="Save Changes"
         />

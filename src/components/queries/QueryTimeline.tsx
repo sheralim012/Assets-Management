@@ -26,7 +26,7 @@ export function QueryTimeline({ comments, currentUserId }: QueryTimelineProps) {
   }
 
   return (
-    <div className="relative space-y-0">
+    <div className="relative space-y-0" aria-live="polite" aria-label="Conversation timeline">
       {/* Vertical connecting line */}
       <div className="absolute left-4 top-2 bottom-2 w-px bg-gray-200" />
 

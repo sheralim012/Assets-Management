@@ -22,14 +22,30 @@ const FILTER_TABS: { value: QueryStatus | 'all'; label: string }[] = [
   { value: 'rejected', label: 'Rejected' },
 ]
 
-export function QueryListEmployee() {
+interface QueryListEmployeeProps {
+  basePath?: string
+  /** When set, filters queries to only this user's queries */
+  userId?: string
+  title?: string
+  subtitle?: string
+}
+
+export function QueryListEmployee({
+  basePath = '/employee/queries',
+  userId,
+  title = 'My Queries',
+  subtitle = 'Track and manage your submitted queries',
+}: QueryListEmployeeProps) {
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<QueryStatus | 'all'>('all')
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AssetQuery | null>(null)
 
   const { data: queries, isLoading } = useQueries(
-    statusFilter === 'all' ? undefined : { status: statusFilter },
+    {
+      ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+      ...(userId ? { employee_id: userId } : {}),
+    },
   )
   const deleteQuery = useDeleteQuery()
 
@@ -55,25 +71,30 @@ export function QueryListEmployee() {
       transition={{ duration: 0.2 }}
     >
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">My Queries</h1>
-        <Button variant="primary" onClick={() => navigate('/employee/queries/new')}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[var(--color-primary)]">{title}</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+            {subtitle}
+          </p>
+        </div>
+        <Button variant="primary" onClick={() => navigate(`${basePath}/new`)} className="self-start sm:self-auto flex-shrink-0">
           <Plus className="w-4 h-4" />
           New Query
         </Button>
       </div>
 
-      {/* Filter pills */}
-      <div className="flex gap-1 mb-6 overflow-x-auto">
+      {/* Filter tabs */}
+      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1">
         {FILTER_TABS.map((tab) => (
           <button
             key={tab.value}
             onClick={() => setStatusFilter(tab.value)}
             className={`
-              px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap
+              px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
               ${statusFilter === tab.value
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-400'
+                ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                : 'bg-white text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]'
               }
             `}
           >
@@ -84,12 +105,15 @@ export function QueryListEmployee() {
 
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse bg-white rounded-lg border border-gray-200 p-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-1/2 mb-3" />
-              <div className="h-3 bg-gray-200 rounded w-1/4" />
+            <div key={i} className="animate-pulse bg-white rounded-xl border border-[var(--color-border)] p-5">
+              <div className="h-4 bg-gray-100 rounded w-3/4 mb-3" />
+              <div className="h-3 bg-gray-100 rounded w-1/2 mb-4" />
+              <div className="flex gap-2">
+                <div className="h-6 bg-gray-100 rounded-full w-24" />
+                <div className="h-6 bg-gray-100 rounded-full w-20" />
+              </div>
             </div>
           ))}
         </div>
@@ -99,7 +123,7 @@ export function QueryListEmployee() {
       {!isLoading && (queries ?? []).length === 0 && (
         <QueryEmptyState
           action={
-            <Button variant="primary" onClick={() => navigate('/employee/queries/new')}>
+            <Button variant="primary" onClick={() => navigate(`${basePath}/new`)}>
               <Plus className="w-4 h-4" />
               New Query
             </Button>
@@ -121,21 +145,21 @@ export function QueryListEmployee() {
               variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.25 } } }}
               whileHover={{ y: -1 }}
               transition={{ duration: 0.15 }}
-              onClick={() => navigate(`/employee/queries/${query.id}`)}
-              className="bg-white rounded-lg border border-gray-200 p-4 cursor-pointer shadow-sm hover:shadow-md transition-shadow relative"
+              onClick={() => navigate(`${basePath}/${query.id}`)}
+              className="bg-white rounded-xl border border-[var(--color-border)] p-5 cursor-pointer shadow-[var(--shadow-card)] hover:shadow-md hover:border-[var(--color-primary)]/20 transition-all relative"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 truncate">{query.title}</h3>
-                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{query.description}</p>
+                  <h3 className="text-sm font-semibold text-[var(--color-text)] truncate">{query.title}</h3>
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-1.5 line-clamp-2">{query.description}</p>
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     <QueryTypePill type={query.query_type} />
                     <StatusBadge status={query.status} />
                     <PriorityBadge priority={query.priority} />
                   </div>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
+                  <div className="flex items-center gap-3 mt-2.5 text-xs text-[var(--color-text-secondary)]">
                     {query.asset && (
-                      <span className="font-mono text-gray-500">{query.asset.asset_tag}</span>
+                      <span className="font-mono text-[var(--color-primary)]">{query.asset.asset_tag}</span>
                     )}
                     <span>{formatDistanceToNow(new Date(query.created_at), { addSuffix: true })}</span>
                   </div>
@@ -146,7 +170,7 @@ export function QueryListEmployee() {
                   <div className="relative flex-shrink-0">
                     <button
                       onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === query.id ? null : query.id) }}
-                      className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="p-1.5 rounded-lg hover:bg-[var(--color-bg)] text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors"
                       aria-label="More actions"
                     >
                       <MoreVertical className="w-4 h-4" />
@@ -154,16 +178,16 @@ export function QueryListEmployee() {
                     {menuOpen === query.id && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setMenuOpen(null) }} />
-                        <div className="absolute right-0 top-8 z-50 w-36 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 py-1">
+                        <div className="absolute right-0 top-8 z-50 w-36 bg-white rounded-xl shadow-[var(--shadow-dropdown)] ring-1 ring-[var(--color-border)] py-1">
                           <button
-                            onClick={(e) => { e.stopPropagation(); setMenuOpen(null); navigate(`/employee/queries/${query.id}/edit`) }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                            onClick={(e) => { e.stopPropagation(); setMenuOpen(null); navigate(`${basePath}/${query.id}/edit`) }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-bg)]"
                           >
                             <Pencil className="w-3.5 h-3.5" /> Edit
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); setMenuOpen(null); setDeleteTarget(query) }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-danger)] hover:bg-[var(--color-danger-light)]"
                           >
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>

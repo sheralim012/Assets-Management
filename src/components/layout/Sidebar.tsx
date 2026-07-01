@@ -3,6 +3,7 @@ import {
 	LayoutDashboard,
 	Package,
 	Wrench,
+	MessageSquare,
 	Users,
 	BarChart2,
 	Settings,
@@ -15,6 +16,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { useAuth } from '@/features/auth/useAuth';
 import { useRepairs } from '@/hooks/useRepairs';
+import { useUnreadCount } from '@/hooks/useNotifications';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
@@ -25,7 +27,8 @@ interface SidebarProps {
 const navItems = [
 	{ path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
 	{ path: '/assets', icon: Package, label: 'Assets' },
-	{ path: '/repair', icon: Wrench, label: 'Repair', showBadge: true },
+	{ path: '/repair', icon: Wrench, label: 'Repair', badgeKey: 'repair' as const },
+	{ path: '/queries', icon: MessageSquare, label: 'Queries', badgeKey: 'queries' as const },
 	{ path: '/users', icon: Users, label: 'Users' },
 	{ path: '/summary', icon: BarChart2, label: 'Summary' },
 	{ path: '/settings', icon: Settings, label: 'Settings' },
@@ -34,8 +37,15 @@ const navItems = [
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 	const { profile, signOut } = useAuth();
 	const { data: openRepairs } = useRepairs({ status: 'open' });
-	const openCount = openRepairs?.length ?? 0;
+	const repairCount = openRepairs?.length ?? 0;
+	const { data: unreadQueryCount } = useUnreadCount();
+	const queryBadge = unreadQueryCount ?? 0;
 	const location = useLocation();
+
+	const badgeCounts: Record<string, number> = {
+		repair: repairCount,
+		queries: queryBadge,
+	};
 
 	return (
 		<motion.aside
@@ -77,8 +87,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
 			{/* Nav */}
 			<nav className='flex-1 py-4 flex flex-col gap-1 px-2 overflow-y-auto'>
-				{navItems.map(({ path, icon: Icon, label, showBadge }) => {
+				{navItems.map(({ path, icon: Icon, label, badgeKey }) => {
 					const isActive = location.pathname.startsWith(path);
+					const badgeCount = badgeKey ? badgeCounts[badgeKey] ?? 0 : 0;
 					const item = (
 						<NavLink
 							key={path}
@@ -108,12 +119,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 									{label}
 								</motion.span>
 							)}
-							{!collapsed && showBadge && openCount > 0 && (
-								<span className='ml-auto min-w-5 h-5 px-1.5 rounded-full bg-[var(--color-primary)] text-white text-xs font-semibold flex items-center justify-center relative z-10'>
-									{openCount}
-								</span>
+							{!collapsed && badgeCount > 0 && (
+								<motion.span
+									initial={{ scale: 0 }}
+									animate={{ scale: 1 }}
+									transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+									className='ml-auto min-w-5 h-5 px-1.5 rounded-full bg-[var(--color-primary)] text-white text-xs font-semibold flex items-center justify-center relative z-10'
+								>
+									{badgeCount > 99 ? '99+' : badgeCount}
+								</motion.span>
 							)}
-							{collapsed && showBadge && openCount > 0 && (
+							{collapsed && badgeCount > 0 && (
 								<span className='absolute top-1 right-1 w-2 h-2 bg-[var(--color-primary)] rounded-full z-10' />
 							)}
 						</NavLink>

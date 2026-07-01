@@ -19,6 +19,7 @@ import { QueryListEmployee } from '@/features/queries/QueryListEmployee'
 import { NewQueryPage } from '@/features/queries/NewQueryPage'
 import { QueryDetailEmployee } from '@/features/queries/QueryDetailEmployee'
 import { EditQueryPage } from '@/features/queries/EditQueryPage'
+import { QueryListAdmin } from '@/features/queries/QueryListAdmin'
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 import { RoleRedirect } from '@/features/auth/RoleRedirect'
 
@@ -57,6 +58,38 @@ export default function App() {
                     element={
                       <ProtectedRoute allowedRoles={['admin', 'manager']}>
                         <RepairPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <QueryListAdmin />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries/new"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <NewQueryPage basePath="/queries" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries/:id"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <QueryDetailEmployee basePath="/queries" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries/:id/edit"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <EditQueryPage basePath="/queries" />
                       </ProtectedRoute>
                     }
                   />
