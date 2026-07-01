@@ -129,17 +129,18 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
 
               {/* Status change dropdown */}
               {!isTerminal && (
-                <div className="relative">
+                <div className="relative inline-block">
                   <button
                     onClick={() => setStatusMenuOpen(!statusMenuOpen)}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90 shadow-sm transition-all"
                   >
-                    Change status...
+                    Change Status
+                    <svg className={`w-3.5 h-3.5 transition-transform ${statusMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                   </button>
                   {statusMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setStatusMenuOpen(false)} />
-                      <div className="absolute left-0 top-7 z-50 w-44 bg-white rounded-lg shadow-lg ring-1 ring-gray-200 py-1">
+                      <div className="absolute left-0 top-10 z-50 w-44 bg-white rounded-xl shadow-[var(--shadow-dropdown)] ring-1 ring-[var(--color-border)] py-1">
                         {STATUS_TRANSITIONS
                           .filter((s) => s.value !== query.status)
                           .map((s) => (
@@ -148,7 +149,7 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
                               onClick={() => handleStatusChange(s.value)}
                               disabled={changeStatus.isPending}
                               className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                                s.value === 'rejected' ? 'text-red-600' : 'text-gray-700'
+                                s.value === 'rejected' ? 'text-[var(--color-danger)]' : 'text-gray-700'
                               }`}
                             >
                               {s.label}

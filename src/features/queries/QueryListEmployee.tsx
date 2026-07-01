@@ -22,14 +22,30 @@ const FILTER_TABS: { value: QueryStatus | 'all'; label: string }[] = [
   { value: 'rejected', label: 'Rejected' },
 ]
 
-export function QueryListEmployee() {
+interface QueryListEmployeeProps {
+  basePath?: string
+  /** When set, filters queries to only this user's queries */
+  userId?: string
+  title?: string
+  subtitle?: string
+}
+
+export function QueryListEmployee({
+  basePath = '/employee/queries',
+  userId,
+  title = 'My Queries',
+  subtitle = 'Track and manage your submitted queries',
+}: QueryListEmployeeProps) {
   const navigate = useNavigate()
   const [statusFilter, setStatusFilter] = useState<QueryStatus | 'all'>('all')
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AssetQuery | null>(null)
 
   const { data: queries, isLoading } = useQueries(
-    statusFilter === 'all' ? undefined : { status: statusFilter },
+    {
+      ...(statusFilter !== 'all' ? { status: statusFilter } : {}),
+      ...(userId ? { employee_id: userId } : {}),
+    },
   )
   const deleteQuery = useDeleteQuery()
 
@@ -57,12 +73,12 @@ export function QueryListEmployee() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-primary)]">My Queries</h1>
+          <h1 className="text-2xl font-bold text-[var(--color-primary)]">{title}</h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            Track and manage your submitted queries
+            {subtitle}
           </p>
         </div>
-        <Button variant="primary" onClick={() => navigate('/employee/queries/new')} className="self-start sm:self-auto flex-shrink-0">
+        <Button variant="primary" onClick={() => navigate(`${basePath}/new`)} className="self-start sm:self-auto flex-shrink-0">
           <Plus className="w-4 h-4" />
           New Query
         </Button>
@@ -107,7 +123,7 @@ export function QueryListEmployee() {
       {!isLoading && (queries ?? []).length === 0 && (
         <QueryEmptyState
           action={
-            <Button variant="primary" onClick={() => navigate('/employee/queries/new')}>
+            <Button variant="primary" onClick={() => navigate(`${basePath}/new`)}>
               <Plus className="w-4 h-4" />
               New Query
             </Button>
@@ -129,7 +145,7 @@ export function QueryListEmployee() {
               variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.25 } } }}
               whileHover={{ y: -1 }}
               transition={{ duration: 0.15 }}
-              onClick={() => navigate(`/employee/queries/${query.id}`)}
+              onClick={() => navigate(`${basePath}/${query.id}`)}
               className="bg-white rounded-xl border border-[var(--color-border)] p-5 cursor-pointer shadow-[var(--shadow-card)] hover:shadow-md hover:border-[var(--color-primary)]/20 transition-all relative"
             >
               <div className="flex items-start justify-between gap-3">
@@ -164,7 +180,7 @@ export function QueryListEmployee() {
                         <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setMenuOpen(null) }} />
                         <div className="absolute right-0 top-8 z-50 w-36 bg-white rounded-xl shadow-[var(--shadow-dropdown)] ring-1 ring-[var(--color-border)] py-1">
                           <button
-                            onClick={(e) => { e.stopPropagation(); setMenuOpen(null); navigate(`/employee/queries/${query.id}/edit`) }}
+                            onClick={(e) => { e.stopPropagation(); setMenuOpen(null); navigate(`${basePath}/${query.id}/edit`) }}
                             className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-bg)]"
                           >
                             <Pencil className="w-3.5 h-3.5" /> Edit

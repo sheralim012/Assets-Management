@@ -70,6 +70,30 @@ export default function App() {
                     }
                   />
                   <Route
+                    path="/queries/new"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <NewQueryPage basePath="/queries" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries/:id"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <QueryDetailEmployee basePath="/queries" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/queries/:id/edit"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin', 'manager']}>
+                        <EditQueryPage basePath="/queries" />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/users"
                     element={
                       <ProtectedRoute allowedRoles={['admin']}>

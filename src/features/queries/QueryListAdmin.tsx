@@ -11,12 +11,65 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { QueryDetailAdminDrawer } from './QueryDetailAdminDrawer'
+import { QueryListEmployee } from './QueryListEmployee'
 import { useQueries } from '@/hooks/useQueries'
+import { useAuth } from '@/features/auth/useAuth'
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, QUERY_TYPE_OPTIONS } from '@/lib/queries-constants'
 import { formatDistanceToNow } from 'date-fns'
 import type { QueryStatus, QueryPriority, QueryType, AssetQuery } from '@/types/queries'
 
+type AdminTab = 'employee' | 'mine'
+
 export function QueryListAdmin() {
+  const { profile } = useAuth()
+  const [activeTab, setActiveTab] = useState<AdminTab>('employee')
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      {/* Tab switcher */}
+      <div className="flex items-center gap-1.5 mb-6">
+        <button
+          onClick={() => setActiveTab('employee')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'employee'
+              ? 'bg-[var(--color-primary)] text-white shadow-sm'
+              : 'bg-white text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]'
+          }`}
+        >
+          Employee Queries
+        </button>
+        <button
+          onClick={() => setActiveTab('mine')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'mine'
+              ? 'bg-[var(--color-primary)] text-white shadow-sm'
+              : 'bg-white text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]'
+          }`}
+        >
+          My Queries
+        </button>
+      </div>
+
+      {activeTab === 'employee' && <EmployeeQueriesTab />}
+      {activeTab === 'mine' && profile && (
+        <QueryListEmployee
+          basePath="/queries"
+          userId={profile.id}
+          title="My Queries"
+          subtitle="Track and manage your own submitted queries"
+        />
+      )}
+    </motion.div>
+  )
+}
+
+/* ─── Employee Queries Tab (existing admin view) ──────────────────── */
+
+function EmployeeQueriesTab() {
   const [search, setSearch] = useState('')
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<QueryStatus | ''>('')
@@ -33,7 +86,6 @@ export function QueryListAdmin() {
   const sorted = useMemo(() => {
     if (!queries) return []
     return [...queries].sort((a, b) => {
-      // Pending/in_progress first, then by date desc
       const aActive = a.status === 'pending' || a.status === 'in_progress' ? 0 : 1
       const bActive = b.status === 'pending' || b.status === 'in_progress' ? 0 : 1
       if (aActive !== bActive) return aActive - bActive
@@ -51,11 +103,7 @@ export function QueryListAdmin() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-    >
+    <>
       <PageHeader
         title="Employee Queries"
         description={`${sorted.length} ${sorted.length === 1 ? 'query' : 'queries'} total`}
@@ -92,7 +140,7 @@ export function QueryListAdmin() {
         {hasFilters && (
           <button
             onClick={clearFilters}
-            className="text-xs text-blue-600 hover:text-blue-700 mt-2"
+            className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary)]/80 mt-2"
           >
             Clear all filters
           </button>
@@ -102,7 +150,7 @@ export function QueryListAdmin() {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-20">
-          <Spinner size="lg" className="text-blue-500" />
+          <Spinner size="lg" className="text-[var(--color-primary)]" />
         </div>
       )}
 
@@ -147,7 +195,7 @@ export function QueryListAdmin() {
         queryId={selectedQueryId}
         onClose={() => setSelectedQueryId(null)}
       />
-    </motion.div>
+    </>
   )
 }
 

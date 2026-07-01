@@ -15,7 +15,7 @@ import { ASSET_TYPE_LABELS } from '@/lib/constants'
 import { formatDistanceToNow } from 'date-fns'
 import toast from 'react-hot-toast'
 
-export function QueryDetailEmployee() {
+export function QueryDetailEmployee({ basePath = '/employee/queries' }: { basePath?: string }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { profile } = useAuth()
@@ -45,7 +45,7 @@ export function QueryDetailEmployee() {
     return (
       <div className="text-center py-20 text-gray-500">
         Query not found.
-        <button onClick={() => navigate('/employee/queries')} className="block mt-4 text-blue-600 hover:underline mx-auto">
+        <button onClick={() => navigate(basePath)} className="block mt-4 text-blue-600 hover:underline mx-auto">
           Back to My Queries
         </button>
       </div>
@@ -62,7 +62,7 @@ export function QueryDetailEmployee() {
     >
       {/* Back button */}
       <button
-        onClick={() => navigate('/employee/queries')}
+        onClick={() => navigate(basePath)}
         aria-label="Back to queries"
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4 transition-colors"
       >
