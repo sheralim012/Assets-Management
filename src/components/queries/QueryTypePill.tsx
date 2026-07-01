@@ -4,18 +4,18 @@ import type { QueryType } from '@/types/queries'
 const TYPE_CONFIG: Record<QueryType, { icon: typeof AlertTriangle; label: string; className: string }> = {
   issue_fault: {
     icon: AlertTriangle,
-    label: 'Issue / Fault',
-    className: 'bg-red-50 text-red-700 ring-red-200',
+    label: 'Issue / Support',
+    className: 'bg-amber-50 text-amber-800 ring-amber-200',
   },
   new_asset_request: {
     icon: Package,
     label: 'New Asset Request',
-    className: 'bg-blue-50 text-blue-700 ring-blue-200',
+    className: 'bg-[var(--color-primary-light)] text-[var(--color-primary)] ring-[var(--color-primary)]/20',
   },
   support_other: {
     icon: HelpCircle,
     label: 'Support / Other',
-    className: 'bg-gray-50 text-gray-700 ring-gray-200',
+    className: 'bg-gray-50 text-gray-600 ring-gray-200',
   },
 }
 

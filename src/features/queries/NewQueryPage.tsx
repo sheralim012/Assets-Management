@@ -25,7 +25,7 @@ export function NewQueryPage() {
       transition={{ duration: 0.2 }}
     >
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">New Query</h1>
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 w-fit min-w-[min(100%,28rem)]">
         <QueryForm
           onSubmit={handleSubmit}
           onCancel={() => navigate('/employee/queries')}

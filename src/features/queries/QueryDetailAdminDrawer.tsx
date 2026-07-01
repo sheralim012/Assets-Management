@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { Drawer } from '@/components/ui/Drawer'
 import { StatusBadge } from '@/components/queries/StatusBadge'
 import { PriorityBadge } from '@/components/queries/PriorityBadge'
@@ -13,7 +12,7 @@ import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/Textarea'
 import { useQueryDetail, useQueryComments } from '@/hooks/useQueryDetail'
 import { useChangeQueryStatus, useAddComment } from '@/hooks/useQueryMutations'
-import { useMarkRead } from '@/hooks/useNotifications'
+import { useRealtimeComments } from '@/hooks/useRealtimeNotifications'
 import { useAuth } from '@/features/auth/useAuth'
 import { ASSET_TYPE_LABELS } from '@/lib/constants'
 import { formatDistanceToNow } from 'date-fns'
@@ -37,18 +36,11 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
   const { data: comments } = useQueryComments(queryId)
   const changeStatus = useChangeQueryStatus()
   const addComment = useAddComment()
-  const markRead = useMarkRead()
+  useRealtimeComments(queryId)
 
   const [statusMenuOpen, setStatusMenuOpen] = useState(false)
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
-  const [pendingStatus, setPendingStatus] = useState<QueryStatus | null>(null)
-
-  // Mark notifications as read when drawer opens
-  useEffect(() => {
-    if (!queryId) return
-    // We don't have a per-query markRead, so this is handled by the notification list
-  }, [queryId])
 
   const isTerminal = query?.status === 'resolved' || query?.status === 'rejected'
 
@@ -56,7 +48,6 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
     if (!queryId) return
 
     if (newStatus === 'rejected') {
-      setPendingStatus(newStatus)
       setRejectModalOpen(true)
       setStatusMenuOpen(false)
       return
@@ -80,7 +71,6 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
       toast.success('Query rejected')
       setRejectModalOpen(false)
       setRejectReason('')
-      setPendingStatus(null)
     } catch {
       toast.error('Failed to reject query')
     }
@@ -218,12 +208,12 @@ export function QueryDetailAdminDrawer({ queryId, onClose }: Props) {
       {/* Reject reason modal */}
       <Modal
         open={rejectModalOpen}
-        onClose={() => { setRejectModalOpen(false); setRejectReason(''); setPendingStatus(null) }}
+        onClose={() => { setRejectModalOpen(false); setRejectReason('') }}
         title="Reject Query"
         size="md"
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setRejectModalOpen(false); setRejectReason(''); setPendingStatus(null) }}>
+            <Button variant="secondary" onClick={() => { setRejectModalOpen(false); setRejectReason('') }}>
               Cancel
             </Button>
             <Button

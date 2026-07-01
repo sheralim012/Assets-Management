@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, Package, HelpCircle, ArrowLeft } from 'lucide-react'
+import { AlertTriangle, Package, ArrowLeft } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
@@ -29,9 +29,8 @@ interface QueryFormProps {
 }
 
 const TYPE_CARDS: { value: QueryType; label: string; desc: string; icon: typeof AlertTriangle }[] = [
-  { value: 'issue_fault', label: 'Issue / Fault', desc: 'Report a problem with an assigned asset', icon: AlertTriangle },
+  { value: 'issue_fault', label: 'Issue / Support', desc: 'Report a problem or request help with an assigned asset', icon: AlertTriangle },
   { value: 'new_asset_request', label: 'New Asset Request', desc: 'Request a new asset to be allocated', icon: Package },
-  { value: 'support_other', label: 'Support / Other', desc: 'Ask for help or support with an asset', icon: HelpCircle },
 ]
 
 export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, submitLabel = 'Submit Query' }: QueryFormProps) {
@@ -47,7 +46,7 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
   const { data: myAssets } = useMyAssignedAssets()
   const { data: categories } = useEmployeeCategories()
 
-  const needsAsset = queryType === 'issue_fault' || queryType === 'support_other'
+  const needsAsset = queryType === 'issue_fault'
   const needsCategory = queryType === 'new_asset_request'
 
   function validate(): boolean {
@@ -105,14 +104,14 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
           >
             {/* Step indicator */}
             <div className="flex items-center gap-2 mb-5">
-              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">1</span>
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-primary)] text-white text-xs font-bold">1</span>
               <span className="text-sm font-medium text-gray-500">Step 1 of 2</span>
               <span className="text-sm text-gray-400">— Choose query type</span>
             </div>
 
             <h2 className="text-lg font-semibold text-gray-900 mb-1">What do you need help with?</h2>
             <p className="text-sm text-gray-500 mb-5">Select the type of query that best describes your request.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-fit">
               {TYPE_CARDS.map(({ value, label, desc, icon: Icon }) => (
                 <motion.button
                   key={value}
@@ -122,12 +121,12 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
                   onClick={() => selectType(value)}
                   className={`
                     p-5 rounded-xl border-2 text-left transition-all
-                    hover:border-blue-500
-                    ${queryType === value ? 'border-blue-500 bg-blue-50/60 ring-2 ring-blue-200' : 'border-gray-200 bg-white'}
+                    hover:border-[var(--color-primary)]
+                    ${queryType === value ? 'border-[var(--color-primary)] bg-[var(--color-primary-light)] ring-2 ring-[var(--color-primary)]/20' : 'border-[var(--color-border)] bg-white'}
                   `}
                 >
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-3">
-                    <Icon className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-lg bg-[var(--color-primary-light)] flex items-center justify-center mb-3">
+                    <Icon className="w-5 h-5 text-[var(--color-primary)]" />
                   </div>
                   <p className="font-semibold text-gray-900 text-sm">{label}</p>
                   <p className="text-xs text-gray-500 mt-1 leading-relaxed">{desc}</p>
@@ -155,7 +154,7 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
             {/* Step indicator + back button */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold">2</span>
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[var(--color-primary)] text-white text-xs font-bold">2</span>
                 <span className="text-sm font-medium text-gray-500">Step 2 of 2</span>
                 <span className="text-sm text-gray-400">— Fill in details</span>
               </div>
@@ -172,9 +171,9 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
 
             {/* Selected type chip */}
             {queryType && (
-              <div className="flex items-center gap-2 p-3 bg-blue-50/60 rounded-lg border border-blue-100">
-                {(() => { const tc = TYPE_CARDS.find(t => t.value === queryType); return tc ? <tc.icon className="w-4 h-4 text-blue-600" /> : null })()}
-                <span className="text-sm font-medium text-blue-800">
+              <div className="flex items-center gap-2 p-3 bg-[var(--color-primary-light)] rounded-lg border border-[var(--color-primary)]/15">
+                {(() => { const tc = TYPE_CARDS.find(t => t.value === queryType); return tc ? <tc.icon className="w-4 h-4 text-[var(--color-primary)]" /> : null })()}
+                <span className="text-sm font-medium text-[var(--color-primary)]">
                   {TYPE_CARDS.find(t => t.value === queryType)?.label}
                 </span>
               </div>

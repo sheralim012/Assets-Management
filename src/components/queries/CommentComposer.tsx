@@ -55,6 +55,7 @@ export function CommentComposer({ onSubmit, loading = false, placeholder = 'Writ
           onClick={handleSubmit}
           disabled={!body.trim() || loading}
           title="Send (Ctrl+Enter)"
+          aria-label="Send message"
           className="
             inline-flex items-center justify-center
             w-10 h-10

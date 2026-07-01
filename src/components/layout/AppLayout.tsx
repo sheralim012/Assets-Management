@@ -18,6 +18,7 @@ import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/features/auth/useAuth';
 import { useRepairs } from '@/hooks/useRepairs';
+import { useRealtimeNotifications } from '@/hooks/useRealtimeNotifications';
 import { cn } from '@/lib/utils';
 
 const COLLAPSED_KEY = 'sidebar_collapsed';
@@ -39,6 +40,7 @@ export function AppLayout() {
 	const { profile, signOut } = useAuth();
 	const { data: openRepairs } = useRepairs({ status: 'open' });
 	const openCount = openRepairs?.length ?? 0;
+	useRealtimeNotifications();
 
 	useEffect(() => {
 		localStorage.setItem(COLLAPSED_KEY, String(collapsed));

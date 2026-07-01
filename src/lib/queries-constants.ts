@@ -29,13 +29,12 @@ export const PRIORITY_OPTIONS: { value: QueryPriority; label: string }[] = [
 ]
 
 export const QUERY_TYPE_LABELS: Record<QueryType, string> = {
-  issue_fault: 'Issue / Fault',
+  issue_fault: 'Issue / Support',
   new_asset_request: 'New Asset Request',
   support_other: 'Support / Other',
 }
 
 export const QUERY_TYPE_OPTIONS: { value: QueryType; label: string }[] = [
-  { value: 'issue_fault', label: 'Issue / Fault' },
+  { value: 'issue_fault', label: 'Issue / Support' },
   { value: 'new_asset_request', label: 'New Asset Request' },
-  { value: 'support_other', label: 'Support / Other' },
 ]
