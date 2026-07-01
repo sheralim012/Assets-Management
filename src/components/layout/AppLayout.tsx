@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { Avatar } from '@/components/ui/Avatar';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useAuth } from '@/features/auth/useAuth';
 import { useRepairs } from '@/hooks/useRepairs';
@@ -56,13 +57,16 @@ export function AppLayout() {
 						className='h-6 w-auto'
 						// style={{ filter: 'brightness(0) invert(1)' }}
 					/>
-					<button
-						onClick={() => setMobileMenuOpen(true)}
-						className='text-white p-2'
-						aria-label='Open menu'
-					>
-						<Menu className='w-6 h-6' />
-					</button>
+					<div className='flex items-center gap-1'>
+						<NotificationBell />
+						<button
+							onClick={() => setMobileMenuOpen(true)}
+							className='text-white p-2'
+							aria-label='Open menu'
+						>
+							<Menu className='w-6 h-6' />
+						</button>
+					</div>
 				</header>
 
 				{/* Overlay drawer */}
@@ -196,7 +200,10 @@ export function AppLayout() {
 				className='min-h-screen transition-all duration-200'
 				style={{ marginLeft: sidebarWidth }}
 			>
-				<div className='p-6'>
+				<div className='flex justify-end px-6 pt-4 pb-0'>
+					<NotificationBell />
+				</div>
+				<div className='p-6 pt-2'>
 					<AnimatePresence mode='wait'>
 						<motion.div
 							key={location.pathname}

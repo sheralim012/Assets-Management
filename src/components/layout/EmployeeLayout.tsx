@@ -1,6 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { useAuth } from '@/features/auth/useAuth'
 
 export function EmployeeLayout() {
@@ -34,7 +35,7 @@ export function EmployeeLayout() {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            {/* Notification bell will be added in Phase 8 */}
+            <NotificationBell />
             {profile && (
               <div className="flex items-center gap-2">
                 <Avatar
