@@ -94,7 +94,7 @@ export function QueryListEmployee({
             {subtitle}
           </p>
         </div>
-        {!isEmpty && (
+        {!isLoading && !isEmpty && (
           <Button variant="primary" onClick={() => navigate(`${basePath}/new`)} className="self-start sm:self-auto flex-shrink-0">
             <Plus className="w-4 h-4" />
             New Query
@@ -102,8 +102,8 @@ export function QueryListEmployee({
         )}
       </div>
 
-      {/* Filter tabs — hidden when no queries at all */}
-      {!isEmpty && (
+      {/* Filter tabs — hidden when loading or no queries at all */}
+      {!isLoading && !isEmpty && (
         <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1">
           {FILTER_TABS.map((tab) => (
             <button
