@@ -34,7 +34,7 @@ interface QueryFormProps {
 }
 
 const TYPE_CARDS: { value: QueryType; label: string; desc: string; icon: typeof AlertTriangle }[] = [
-  { value: 'issue_fault', label: 'Issue / Support', desc: 'Report a problem or request help with an assigned asset', icon: AlertTriangle },
+  { value: 'issue_fault', label: 'Issue/Support', desc: 'Report a problem or request help with an assigned asset', icon: AlertTriangle },
   { value: 'new_asset_request', label: 'New Asset Request', desc: 'Request a new asset to be allocated', icon: Package },
 ]
 
