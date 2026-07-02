@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Calendar } from 'lucide-react'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { Select } from '@/components/ui/Select'
@@ -15,7 +15,7 @@ import { QueryListEmployee } from './QueryListEmployee'
 import { useQueries } from '@/hooks/useQueries'
 import { useAuth } from '@/features/auth/useAuth'
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, QUERY_TYPE_OPTIONS } from '@/lib/queries-constants'
-import { formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import type { QueryStatus, QueryPriority, QueryType, AssetQuery } from '@/types/queries'
 
 type AdminTab = 'employee' | 'mine'
@@ -75,12 +75,16 @@ function EmployeeQueriesTab() {
   const [statusFilter, setStatusFilter] = useState<QueryStatus | ''>('')
   const [priorityFilter, setPriorityFilter] = useState<QueryPriority | ''>('')
   const [typeFilter, setTypeFilter] = useState<QueryType | ''>('')
+  const [dateFilter, setDateFilter] = useState('')
+
+  const today = new Date().toISOString().split('T')[0]
 
   const { data: queries, isLoading } = useQueries({
     status: statusFilter || undefined,
     priority: priorityFilter || undefined,
     query_type: typeFilter || undefined,
     search: search || undefined,
+    date: dateFilter || undefined,
   })
 
   const sorted = useMemo(() => {
@@ -93,13 +97,14 @@ function EmployeeQueriesTab() {
     })
   }, [queries])
 
-  const hasFilters = !!search || !!statusFilter || !!priorityFilter || !!typeFilter
+  const hasFilters = !!search || !!statusFilter || !!priorityFilter || !!typeFilter || !!dateFilter
 
   function clearFilters() {
     setSearch('')
     setStatusFilter('')
     setPriorityFilter('')
     setTypeFilter('')
+    setDateFilter('')
   }
 
   return (
@@ -111,7 +116,7 @@ function EmployeeQueriesTab() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-[var(--color-border)] shadow-sm p-4 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -136,6 +141,16 @@ function EmployeeQueriesTab() {
             onValueChange={(v) => setTypeFilter(v === '__all__' ? '' : v as QueryType)}
             placeholder="Type"
           />
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-secondary)] pointer-events-none" />
+            <input
+              type="date"
+              value={dateFilter}
+              max={today}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-full h-10 pl-9 pr-3 rounded-lg border border-[var(--color-border)] bg-white text-sm text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]"
+            />
+          </div>
         </div>
         {hasFilters && (
           <button
@@ -251,7 +266,7 @@ function QueryRow({ query, even, onClick }: { query: AssetQuery; even: boolean; 
         <StatusBadge status={query.status} />
       </td>
       <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-        {formatDistanceToNow(new Date(query.created_at), { addSuffix: true })}
+        {format(new Date(query.created_at), 'dd MMM yyyy, hh:mm a')}
       </td>
     </tr>
   )

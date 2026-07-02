@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -10,7 +10,7 @@ import { QueryEmptyState } from '@/components/queries/QueryEmptyState'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useQueries } from '@/hooks/useQueries'
 import { useDeleteQuery } from '@/hooks/useQueryMutations'
-import { formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 import type { QueryStatus, AssetQuery } from '@/types/queries'
 
@@ -37,7 +37,15 @@ export function QueryListEmployee({
   subtitle = 'Track and manage your submitted queries',
 }: QueryListEmployeeProps) {
   const navigate = useNavigate()
-  const [statusFilter, setStatusFilter] = useState<QueryStatus | 'all'>('all')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const statusFilter = (searchParams.get('status') as QueryStatus | 'all') || 'all'
+  const setStatusFilter = (value: QueryStatus | 'all') => {
+    if (value === 'all') {
+      setSearchParams({}, { replace: true })
+    } else {
+      setSearchParams({ status: value }, { replace: true })
+    }
+  }
   const [menuOpen, setMenuOpen] = useState<string | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AssetQuery | null>(null)
 
@@ -49,8 +57,16 @@ export function QueryListEmployee({
   )
   const deleteQuery = useDeleteQuery()
 
+  const hasQueries = !isLoading && (queries ?? []).length > 0
+  const isEmpty = !isLoading && (queries ?? []).length === 0 && statusFilter === 'all'
+  const isFilteredEmpty = !isLoading && (queries ?? []).length === 0 && statusFilter !== 'all'
+
   function canEditDelete(query: AssetQuery): boolean {
-    return query.status === 'pending'
+    if (query.status !== 'pending') return false
+    const hasOtherReply = (query.query_comments ?? []).some(
+      (c) => !c.is_system_message && c.author_id !== query.employee_id,
+    )
+    return !hasOtherReply
   }
 
   async function handleDelete() {
@@ -78,30 +94,34 @@ export function QueryListEmployee({
             {subtitle}
           </p>
         </div>
-        <Button variant="primary" onClick={() => navigate(`${basePath}/new`)} className="self-start sm:self-auto flex-shrink-0">
-          <Plus className="w-4 h-4" />
-          New Query
-        </Button>
+        {!isEmpty && (
+          <Button variant="primary" onClick={() => navigate(`${basePath}/new`)} className="self-start sm:self-auto flex-shrink-0">
+            <Plus className="w-4 h-4" />
+            New Query
+          </Button>
+        )}
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1">
-        {FILTER_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setStatusFilter(tab.value)}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
-              ${statusFilter === tab.value
-                ? 'bg-[var(--color-primary)] text-white shadow-sm'
-                : 'bg-white text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]'
-              }
-            `}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/* Filter tabs — hidden when no queries at all */}
+      {!isEmpty && (
+        <div className="flex gap-1.5 mb-6 overflow-x-auto pb-1">
+          {FILTER_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStatusFilter(tab.value)}
+              className={`
+                px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+                ${statusFilter === tab.value
+                  ? 'bg-[var(--color-primary)] text-white shadow-sm'
+                  : 'bg-white text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-primary)]'
+                }
+              `}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Loading skeleton */}
       {isLoading && (
@@ -119,8 +139,8 @@ export function QueryListEmployee({
         </div>
       )}
 
-      {/* Empty state */}
-      {!isLoading && (queries ?? []).length === 0 && (
+      {/* Empty state — first time, no queries */}
+      {isEmpty && (
         <QueryEmptyState
           action={
             <Button variant="primary" onClick={() => navigate(`${basePath}/new`)}>
@@ -131,8 +151,16 @@ export function QueryListEmployee({
         />
       )}
 
+      {/* Empty state — filter has no results */}
+      {isFilteredEmpty && (
+        <QueryEmptyState
+          title="No matching queries"
+          description={`No queries with status "${FILTER_TABS.find(t => t.value === statusFilter)?.label}".`}
+        />
+      )}
+
       {/* Query cards */}
-      {!isLoading && (queries ?? []).length > 0 && (
+      {hasQueries && (
         <motion.div
           initial="hidden"
           animate="visible"
@@ -161,7 +189,7 @@ export function QueryListEmployee({
                     {query.asset && (
                       <span className="font-mono text-[var(--color-primary)]">{query.asset.asset_tag}</span>
                     )}
-                    <span>{formatDistanceToNow(new Date(query.created_at), { addSuffix: true })}</span>
+                    <span>{format(new Date(query.created_at), 'dd MMM yyyy, hh:mm a')}</span>
                   </div>
                 </div>
 

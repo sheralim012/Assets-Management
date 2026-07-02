@@ -6,6 +6,7 @@ import { PriorityBadge } from '@/components/queries/PriorityBadge'
 import { QueryTypePill } from '@/components/queries/QueryTypePill'
 import { QueryTimeline } from '@/components/queries/QueryTimeline'
 import { CommentComposer } from '@/components/queries/CommentComposer'
+import { QueryAttachmentView } from '@/components/queries/QueryAttachmentView'
 import { Spinner } from '@/components/ui/Spinner'
 import { useQueryDetail, useQueryComments } from '@/hooks/useQueryDetail'
 import { useAddComment } from '@/hooks/useQueryMutations'
@@ -92,7 +93,7 @@ export function QueryDetailEmployee({ basePath = '/employee/queries' }: { basePa
         </div>
 
         {/* Asset info */}
-        {query.asset && (
+        {query.asset ? (
           <div className="mt-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100 space-y-1">
             <p className="text-xs text-gray-500 mb-2">Related Asset</p>
             <p className="text-sm text-gray-700">
@@ -110,7 +111,15 @@ export function QueryDetailEmployee({ basePath = '/employee/queries' }: { basePa
               </p>
             )}
           </div>
+        ) : query.query_type === 'issue_fault' && (
+          <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-xs text-gray-500 mb-1">Related Asset</p>
+            <p className="text-sm text-gray-400 italic">Asset has been removed from the system</p>
+          </div>
         )}
+
+        {/* Attachment */}
+        <QueryAttachmentView queryId={query.id} />
       </div>
 
       {/* Timeline + Composer */}

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Activity, CirclePlus } from 'lucide-react'
 import { Avatar } from '@/components/ui/Avatar'
-import { formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import type { QueryComment } from '@/types/queries'
 
 interface QueryTimelineProps {
@@ -65,7 +65,7 @@ function SystemMessage({ comment }: { comment: QueryComment }) {
         <p className="text-sm italic text-gray-500">{comment.body}</p>
         <p className="text-xs text-gray-400 mt-0.5">
           {comment.author?.name && `by ${comment.author.name} · `}
-          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+          {format(new Date(comment.created_at), 'dd MMM yyyy, hh:mm a')}
         </p>
       </div>
     </div>
@@ -93,7 +93,7 @@ function UserMessage({ comment, isOwn }: { comment: QueryComment; isOwn: boolean
           </span>
         )}
         <span className="text-xs text-gray-400">
-          {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+          {format(new Date(comment.created_at), 'dd MMM yyyy, hh:mm a')}
         </span>
       </div>
       <div className={`rounded-lg p-3 ${bgColor}`}>

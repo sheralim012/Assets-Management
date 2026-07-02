@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input'
 import { Textarea } from '@/components/ui/Textarea'
 import { Select } from '@/components/ui/Select'
 import { Button } from '@/components/ui/Button'
+import { QueryImageUpload } from '@/components/queries/QueryImageUpload'
 import { useMyAssignedAssets } from '@/hooks/useMyAssignedAssets'
 import { useEmployeeCategories } from '@/hooks/useEmployeeCategories'
 import { PRIORITY_OPTIONS } from '@/lib/queries-constants'
@@ -18,10 +19,14 @@ interface QueryFormValues {
   title: string
   description: string
   priority: QueryPriority
+  attachment?: File | null
+  removeExistingAttachment?: boolean
 }
 
 interface QueryFormProps {
   initialValues?: Partial<QueryFormValues>
+  existingAttachmentUrl?: string | null
+  existingAttachmentName?: string | null
   onSubmit: (values: QueryFormValues) => Promise<void>
   onCancel: () => void
   loading?: boolean
@@ -33,7 +38,7 @@ const TYPE_CARDS: { value: QueryType; label: string; desc: string; icon: typeof 
   { value: 'new_asset_request', label: 'New Asset Request', desc: 'Request a new asset to be allocated', icon: Package },
 ]
 
-export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, submitLabel = 'Submit Query' }: QueryFormProps) {
+export function QueryForm({ initialValues, existingAttachmentUrl, existingAttachmentName, onSubmit, onCancel, loading = false, submitLabel = 'Submit Query' }: QueryFormProps) {
   const [step, setStep] = useState<1 | 2>(initialValues?.query_type ? 2 : 1)
   const [queryType, setQueryType] = useState<QueryType | null>(initialValues?.query_type ?? null)
   const [assetId, setAssetId] = useState<string | null>(initialValues?.asset_id ?? null)
@@ -41,6 +46,8 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
   const [title, setTitle] = useState(initialValues?.title ?? '')
   const [description, setDescription] = useState(initialValues?.description ?? '')
   const [priority, setPriority] = useState<QueryPriority>(initialValues?.priority ?? 'medium')
+  const [attachment, setAttachment] = useState<File | null>(null)
+  const [removedExisting, setRemovedExisting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const { data: myAssets } = useMyAssignedAssets()
@@ -70,6 +77,8 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
       title: title.trim(),
       description: description.trim(),
       priority,
+      attachment: needsAsset ? attachment : null,
+      removeExistingAttachment: removedExisting,
     })
   }
 
@@ -77,6 +86,8 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
     setQueryType(type)
     setAssetId(null)
     setCategorySlug(null)
+    setAttachment(null)
+    setRemovedExisting(false)
     setErrors({})
     setStep(2)
   }
@@ -205,6 +216,16 @@ export function QueryForm({ initialValues, onSubmit, onCancel, loading = false, 
                 onValueChange={(v) => { setCategorySlug(v || null); setErrors((e) => ({ ...e, category: '' })) }}
                 placeholder="Select a category..."
                 error={errors.category}
+              />
+            )}
+
+            {needsAsset && (
+              <QueryImageUpload
+                file={attachment}
+                onChange={setAttachment}
+                existingUrl={!removedExisting ? existingAttachmentUrl : null}
+                existingName={!removedExisting ? existingAttachmentName : null}
+                onRemoveExisting={() => setRemovedExisting(true)}
               />
             )}
 
