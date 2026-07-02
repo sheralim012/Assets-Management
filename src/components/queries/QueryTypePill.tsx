@@ -4,7 +4,7 @@ import type { QueryType } from '@/types/queries'
 const TYPE_CONFIG: Record<QueryType, { icon: typeof AlertTriangle; label: string; className: string }> = {
   issue_fault: {
     icon: AlertTriangle,
-    label: 'Issue / Support',
+    label: 'Issue/Support',
     className: 'bg-amber-50 text-amber-800 ring-amber-200',
   },
   new_asset_request: {
