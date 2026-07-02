@@ -17,6 +17,7 @@ export interface AssetQuery {
   status: QueryStatus
   created_at: string
   updated_at: string
+  query_comments?: { author_id: string; is_system_message: boolean }[]
 }
 
 export interface QueryComment {
@@ -56,4 +57,5 @@ export interface QueryFilters {
   query_type?: QueryType
   search?: string
   employee_id?: string
+  date?: string
 }

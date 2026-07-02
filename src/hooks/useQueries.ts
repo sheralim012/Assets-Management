@@ -17,7 +17,8 @@ export function useQueries(filters?: QueryFilters) {
         .select(`
           *,
           employee:profiles!employee_id(id, name, email, avatar_url),
-          asset:assets!asset_id(id, asset_tag, manufacturer, specs)
+          asset:assets!asset_id(id, asset_tag, manufacturer, specs),
+          query_comments(author_id, is_system_message)
         `)
         .order('created_at', { ascending: false })
 
@@ -27,6 +28,10 @@ export function useQueries(filters?: QueryFilters) {
       if (filters?.employee_id) q = q.eq('employee_id', filters.employee_id)
       if (filters?.search) {
         q = q.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+      }
+      if (filters?.date) {
+        q = q.gte('created_at', `${filters.date}T00:00:00`)
+          .lt('created_at', `${filters.date}T23:59:59.999`)
       }
 
       const { data, error } = await q

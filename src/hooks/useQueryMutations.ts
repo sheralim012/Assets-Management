@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/features/auth/useAuth'
+import { deleteAllQueryAttachments } from '@/hooks/useQueryAttachments'
 import type { QueryType, QueryPriority, QueryStatus } from '@/types/queries'
 
 interface CreateQueryInput {
@@ -76,6 +77,7 @@ export function useDeleteQuery() {
 
   return useMutation({
     mutationFn: async (queryId: string) => {
+      await deleteAllQueryAttachments(queryId)
       const { error } = await supabase
         .from('asset_queries')
         .delete()
